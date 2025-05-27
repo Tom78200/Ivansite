@@ -55,7 +55,7 @@ export class MemStorage implements IStorage {
   }
 
   private initializeArtworks() {
-    const artworks = [
+    const artworks: Omit<Artwork, 'id'>[] = [
       {
         title: "Juste en Bleu 3",
         imageUrl: "https://www.galerie-breheret.com/datas/img/IVAN_GAUTHIER_JUSTE_EN_BLEU_3_61X48_CM_GOUACHE_POLYCHROMOS_ET_ACRYLIQUE_SUR_PAPIER.jpg",
@@ -168,12 +168,17 @@ export class MemStorage implements IStorage {
 
     artworks.forEach(artwork => {
       const id = this.currentArtworkId++;
-      this.artworks.set(id, { ...artwork, id, isVisible: artwork.isVisible ?? true });
+      const fullArtwork: Artwork = { 
+        ...artwork, 
+        id, 
+        isVisible: artwork.isVisible 
+      };
+      this.artworks.set(id, fullArtwork);
     });
   }
 
   private initializeExhibitions() {
-    const exhibitions = [
+    const exhibitions: Omit<Exhibition, 'id'>[] = [
       {
         title: "Paris",
         location: "Galerie Bréheret, Paris",
@@ -212,12 +217,13 @@ export class MemStorage implements IStorage {
 
     exhibitions.forEach(exhibition => {
       const id = this.currentExhibitionId++;
-      this.exhibitions.set(id, { 
-        ...exhibition, 
+      const fullExhibition: Exhibition = {
+        ...exhibition,
         id,
-        galleryImages: exhibition.galleryImages ?? null,
-        videoUrl: exhibition.videoUrl ?? null
-      });
+        galleryImages: exhibition.galleryImages || null,
+        videoUrl: exhibition.videoUrl || null
+      };
+      this.exhibitions.set(id, fullExhibition);
     });
   }
 
