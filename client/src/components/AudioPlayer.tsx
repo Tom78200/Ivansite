@@ -7,7 +7,7 @@ export default function AudioPlayer() {
   const [hasStarted, setHasStarted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // New Age ambient music URL - using a royalty-free ambient track
+  // New Age ambient music URL - using a peaceful ambient track
   const audioUrl = "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav";
 
   useEffect(() => {
