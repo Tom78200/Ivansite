@@ -70,6 +70,34 @@
     transform: scale(1.05);
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
   }
+
+  .masonry-grid {
+    columns: 3;
+    column-gap: 2rem;
+    column-fill: balance;
+  }
+  
+  @media (max-width: 1024px) {
+    .masonry-grid {
+      columns: 2;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .masonry-grid {
+      columns: 1;
+    }
+  }
+  
+  .artwork-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  .artwork-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
+  }
   
   .nav-slide {
     transform: translateX(100%);
