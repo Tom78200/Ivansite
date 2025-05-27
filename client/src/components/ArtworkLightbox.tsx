@@ -20,47 +20,50 @@ export default function ArtworkLightbox({ artwork, isOpen, onClose }: ArtworkLig
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="fixed inset-0 bg-[hsl(210,40%,12%)] bg-opacity-95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center"
           onClick={onClose}
         >
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="max-w-6xl max-h-screen relative"
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="relative w-[90vw] h-[90vh] overflow-hidden rounded-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-3 hover:bg-opacity-30 transition-all duration-300"
+              className="absolute top-6 right-6 z-20 bg-black/30 backdrop-blur-sm rounded-full p-3 hover:bg-black/50 transition-all duration-300"
             >
-              <X className="text-white text-xl" size={20} />
+              <X className="text-white" size={24} />
             </button>
             
-            <div className="bg-white rounded-xl p-8 max-h-full overflow-auto">
-              <div className="grid md:grid-cols-2 gap-8 items-start">
-                <div>
-                  <img 
-                    src={artwork.imageUrl} 
-                    alt={artwork.title}
-                    className="w-full rounded-lg shadow-lg"
-                  />
-                </div>
-                <div className="space-y-6 text-[hsl(210,40%,12%)]">
-                  <h3 className="text-3xl font-playfair">{artwork.title}</h3>
-                  <div className="space-y-3 text-lg">
-                    <p><strong>Dimensions:</strong> {artwork.dimensions}</p>
-                    <p><strong>Technique:</strong> {artwork.technique}</p>
-                    <p><strong>Année:</strong> {artwork.year}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-semibold mb-3">Description</h4>
-                    <p className="leading-relaxed">{artwork.description}</p>
-                  </div>
-                </div>
-              </div>
+            {/* Image takes 90% of space */}
+            <div className="relative w-full h-[90%]">
+              <img 
+                src={artwork.imageUrl} 
+                alt={artwork.title}
+                className="w-full h-full object-contain"
+              />
             </div>
+            
+            {/* Info panel at bottom - 10% with transparency */}
+            <motion.div 
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="absolute bottom-0 left-0 right-0 h-[10%] bg-gradient-to-t from-black/80 to-transparent backdrop-blur-sm p-6 flex items-center justify-between"
+            >
+              <div className="text-white">
+                <h3 className="text-2xl font-playfair mb-1">{artwork.title}</h3>
+                <p className="text-white/80 text-sm">
+                  {artwork.technique} • {artwork.dimensions} • {artwork.year}
+                </p>
+              </div>
+              <div className="text-right text-white/60 text-xs max-w-md">
+                <p className="line-clamp-2">{artwork.description}</p>
+              </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       )}

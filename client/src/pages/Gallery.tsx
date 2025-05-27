@@ -83,7 +83,7 @@ export default function Gallery() {
       </section>
 
       {/* Gallery Grid */}
-      <section className="min-h-screen bg-[hsl(210,40%,12%)] py-20">
+      <section className="min-h-screen py-20">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

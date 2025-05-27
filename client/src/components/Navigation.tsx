@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navigation() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [location] = useLocation();
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const menuItems = [
     { href: "/", label: "Galerie" },
@@ -16,58 +23,76 @@ export default function Navigation() {
   ];
 
   return (
-    <>
-      {/* Hamburger Menu Button */}
-      <motion.button
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5 }}
-        onClick={toggleMenu}
-        className={`fixed top-6 right-6 z-50 bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-3 hover:bg-opacity-30 transition-all duration-300 ${isOpen ? 'hamburger-open' : ''}`}
-      >
-        <div className="w-6 h-6 flex flex-col justify-center items-center">
-          <span className="hamburger-line line1 block w-6 h-0.5 bg-white mb-1" />
-          <span className="hamburger-line line2 block w-6 h-0.5 bg-white mb-1" />
-          <span className="hamburger-line line3 block w-6 h-0.5 bg-white" />
-        </div>
-      </motion.button>
-
-      {/* Overlay */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-30"
-            onClick={toggleMenu}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Navigation Menu */}
-      <motion.nav
-        initial={{ x: "100%" }}
-        animate={{ x: isOpen ? 0 : "100%" }}
-        transition={{ type: "tween", duration: 0.3, ease: "easeInOut" }}
-        className="fixed top-0 right-0 h-full w-80 bg-white z-40 shadow-2xl"
-      >
-        <div className="flex flex-col h-full pt-20 px-8">
-          {menuItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={toggleMenu}
-              className={`text-xl font-playfair mb-8 hover:opacity-70 transition-opacity duration-300 ${
-                location === item.href ? 'text-[hsl(210,40%,12%)] font-semibold' : 'text-[hsl(210,40%,12%)]'
-              }`}
-            >
-              {item.label}
+    <motion.header
+      initial={{ y: 0, opacity: 1 }}
+      animate={{ 
+        y: isScrolled ? -100 : 0,
+        opacity: isScrolled ? 0 : 1
+      }}
+      transition={{ duration: 0.3 }}
+      className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm"
+    >
+      <nav className="max-w-7xl mx-auto px-8 py-6">
+        <div className="flex items-center justify-between">
+          {/* Left Menu */}
+          <div className="flex space-x-8">
+            <Link href="/expositions">
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                className={`text-white font-playfair text-lg hover:opacity-70 transition-opacity cursor-pointer ${
+                  location === '/expositions' ? 'opacity-100 font-semibold' : 'opacity-80'
+                }`}
+              >
+                Expositions
+              </motion.span>
             </Link>
-          ))}
+            <Link href="/about">
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                className={`text-white font-playfair text-lg hover:opacity-70 transition-opacity cursor-pointer ${
+                  location === '/about' ? 'opacity-100 font-semibold' : 'opacity-80'
+                }`}
+              >
+                À propos
+              </motion.span>
+            </Link>
+          </div>
+
+          {/* Center Logo */}
+          <Link href="/">
+            <motion.h1
+              whileHover={{ scale: 1.02 }}
+              className="text-white font-playfair text-2xl md:text-3xl tracking-[0.2em] uppercase cursor-pointer"
+            >
+              Ivan Gauthier
+            </motion.h1>
+          </Link>
+
+          {/* Right Menu */}
+          <div className="flex space-x-8">
+            <Link href="/">
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                className={`text-white font-playfair text-lg hover:opacity-70 transition-opacity cursor-pointer ${
+                  location === '/' ? 'opacity-100 font-semibold' : 'opacity-80'
+                }`}
+              >
+                Galerie
+              </motion.span>
+            </Link>
+            <Link href="/contact">
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                className={`text-white font-playfair text-lg hover:opacity-70 transition-opacity cursor-pointer ${
+                  location === '/contact' ? 'opacity-100 font-semibold' : 'opacity-80'
+                }`}
+              >
+                Contact
+              </motion.span>
+            </Link>
+          </div>
         </div>
-      </motion.nav>
-    </>
+      </nav>
+    </motion.header>
   );
 }
