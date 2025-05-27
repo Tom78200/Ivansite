@@ -49,43 +49,41 @@ export default function Gallery() {
   }
 
   return (
-    <section className="min-h-screen py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {artworks.map((artwork, index) => (
-            <motion.div
-              key={artwork.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.6 }}
-              className="artwork-hover-glow group cursor-pointer relative overflow-hidden rounded-lg"
-              onClick={() => openLightbox(artwork)}
+    <section className="min-h-screen w-full p-0 m-0">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-0 h-screen"
+      >
+        {artworks.map((artwork, index) => (
+          <motion.div
+            key={artwork.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1, duration: 0.6 }}
+            className="artwork-hover-glow group cursor-pointer relative overflow-hidden"
+            onClick={() => openLightbox(artwork)}
+          >
+            <img 
+              src={artwork.imageUrl} 
+              alt={artwork.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-500" />
+            <motion.div 
+              initial={{ opacity: 0 }}
+              whileHover={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="absolute inset-0 flex items-end p-6"
             >
-              <img 
-                src={artwork.imageUrl} 
-                alt={artwork.title}
-                className="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-500" />
-              <motion.div 
-                initial={{ opacity: 0 }}
-                whileHover={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 flex items-end p-6"
-              >
-                <h3 className="text-white text-xl font-playfair drop-shadow-lg">
-                  {artwork.title}
-                </h3>
-              </motion.div>
+              <h3 className="text-white text-xl font-playfair drop-shadow-lg">
+                {artwork.title}
+              </h3>
             </motion.div>
-          ))}
-        </motion.div>
-      </div>
+          </motion.div>
+        ))}
+      </motion.div>
 
       <ArtworkLightbox
         artwork={selectedArtwork}
