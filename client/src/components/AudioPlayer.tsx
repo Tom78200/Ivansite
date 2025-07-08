@@ -1,66 +1,114 @@
-import { useState, useRef, useEffect } from "react";
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady?: () => void;
+    YT: {
+      Player: {
+        new (elementId: string, config: {
+          height: string | number;
+          width: string | number;
+          videoId: string;
+          playerVars?: {
+            autoplay?: number;
+            controls?: number;
+            loop?: number;
+            playlist?: string;
+          };
+          events?: {
+            onStateChange?: (event: { data: number }) => void;
+          };
+        }): {
+          playVideo: () => void;
+          pauseVideo: () => void;
+          destroy: () => void;
+        };
+      };
+      PlayerState: {
+        PLAYING: number;
+      };
+    };
+  }
+}
+
+import { useState, useEffect } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { motion } from "framer-motion";
 
+type YouTubePlayer = {
+  playVideo: () => void;
+  pauseVideo: () => void;
+  destroy: () => void;
+};
+
 export default function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  // New Age ambient music URL - using a peaceful ambient track
-  const audioUrl = "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav";
+  const [player, setPlayer] = useState<YouTubePlayer | null>(null);
 
   useEffect(() => {
-    const handleFirstClick = () => {
-      if (!hasStarted && audioRef.current) {
-        audioRef.current.play().catch(console.error);
-        setIsPlaying(true);
-        setHasStarted(true);
-      }
+    // Créer un div caché pour le player YouTube
+    const playerContainer = document.createElement('div');
+    playerContainer.id = 'youtube-player';
+    playerContainer.style.position = 'absolute';
+    playerContainer.style.left = '-9999px';
+    playerContainer.style.top = '-9999px';
+    document.body.appendChild(playerContainer);
+
+    // Charger l'API YouTube
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // Initialiser le player
+    window.onYouTubeIframeAPIReady = () => {
+      const newPlayer = new window.YT.Player('youtube-player', {
+        height: '1',
+        width: '1',
+        videoId: 'YRu6NK19VkQ',
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          loop: 1,
+          playlist: 'YRu6NK19VkQ'
+        }
+      });
+
+      setPlayer(newPlayer);
     };
 
-    document.addEventListener('click', handleFirstClick, { once: true });
-    return () => document.removeEventListener('click', handleFirstClick);
-  }, [hasStarted]);
+    return () => {
+      if (player) {
+        player.destroy();
+      }
+      document.body.removeChild(playerContainer);
+    };
+  }, []);
 
-  const toggleAudio = () => {
-    if (!audioRef.current) return;
+  const togglePlay = () => {
+    if (!player) return;
 
     if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
+      player.pauseVideo();
     } else {
-      audioRef.current.play().catch(console.error);
-      setIsPlaying(true);
+      player.playVideo();
     }
+    setIsPlaying(!isPlaying);
   };
 
   return (
-    <>
-      <audio
-        ref={audioRef}
-        loop
-        preload="auto"
-        onEnded={() => setIsPlaying(false)}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      >
-        <source src={audioUrl} type="audio/mpeg" />
-      </audio>
-      
-      <motion.button
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1 }}
-        onClick={toggleAudio}
-        className="fixed bottom-6 right-6 z-50 bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-3 hover:bg-opacity-30 transition-all duration-300"
-      >
-        {isPlaying ? (
-          <Volume2 className="text-white text-lg" size={20} />
-        ) : (
-          <VolumeX className="text-white text-lg" size={20} />
-        )}
-      </motion.button>
-    </>
+    <motion.button
+      onClick={togglePlay}
+      className="fixed bottom-8 right-8 z-50 p-4 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl hover:bg-white/20 transition-all duration-300"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      {isPlaying ? (
+        <Volume2 className="w-6 h-6 text-white" />
+      ) : (
+        <VolumeX className="w-6 h-6 text-white" />
+      )}
+    </motion.button>
   );
 }

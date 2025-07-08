@@ -7,7 +7,7 @@ export default function AnimatedBackground() {
       {Array.from({ length: 20 }).map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-1 h-1 bg-white opacity-20 rounded-full"
+          className="absolute w-1 h-1 bg-foreground opacity-10 rounded-full"
           initial={{
             x: Math.random() * window.innerWidth,
             y: Math.random() * window.innerHeight,
@@ -26,10 +26,10 @@ export default function AnimatedBackground() {
       
       {/* Gradient orbs */}
       <motion.div
-        className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-full blur-3xl"
+        className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-white/5 to-white/0 rounded-full blur-3xl"
         animate={{
           scale: [1, 1.2, 1],
-          opacity: [0.3, 0.1, 0.3],
+          opacity: [0.2, 0.1, 0.2],
         }}
         transition={{
           duration: 8,
@@ -39,10 +39,10 @@ export default function AnimatedBackground() {
       />
       
       <motion.div
-        className="absolute top-3/4 right-1/4 w-80 h-80 bg-gradient-to-r from-indigo-600/10 to-blue-600/10 rounded-full blur-3xl"
+        className="absolute top-3/4 right-1/4 w-80 h-80 bg-gradient-to-r from-white/5 to-white/0 rounded-full blur-3xl"
         animate={{
           scale: [1.2, 1, 1.2],
-          opacity: [0.1, 0.3, 0.1],
+          opacity: [0.1, 0.2, 0.1],
         }}
         transition={{
           duration: 10,
@@ -52,10 +52,10 @@ export default function AnimatedBackground() {
       />
       
       <motion.div
-        className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-purple-600/10 to-indigo-600/10 rounded-full blur-3xl"
+        className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-white/5 to-white/0 rounded-full blur-3xl"
         animate={{
           scale: [1, 1.3, 1],
-          opacity: [0.2, 0.05, 0.2],
+          opacity: [0.15, 0.05, 0.15],
         }}
         transition={{
           duration: 12,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import type { Artwork } from "@shared/schema";
@@ -10,6 +10,14 @@ interface ArtworkLightboxProps {
 }
 
 export default function ArtworkLightbox({ artwork, isOpen, onClose }: ArtworkLightboxProps) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsImageLoaded(false);
+    }
+  }, [isOpen]);
+
   if (!artwork) return null;
 
   return (
@@ -19,49 +27,96 @@ export default function ArtworkLightbox({ artwork, isOpen, onClose }: ArtworkLig
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center"
+          transition={{ duration: 0.6 }}
+          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center"
+          role="dialog" aria-modal="true"
           onClick={onClose}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="relative w-[90vw] h-[90vh] overflow-hidden rounded-lg"
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            transition={{ 
+              type: "spring",
+              damping: 30,
+              stiffness: 200,
+              mass: 1
+            }}
+            className="relative w-[90vw] h-[90vh] overflow-hidden rounded-lg bg-black/50"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
+            <motion.button
               onClick={onClose}
-              className="absolute top-6 right-6 z-20 bg-black/30 backdrop-blur-sm rounded-full p-3 hover:bg-black/50 transition-all duration-300"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="absolute top-2 right-2 z-20 bg-black/60 rounded-full p-2 hover:bg-white/20 active:scale-95 transition-all duration-300 shadow-md border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+              aria-label="Fermer la fenêtre d'aperçu"
+              whileHover={{ scale: 1.12, rotate: 90 }}
+              whileTap={{ scale: 0.93 }}
+              style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.25)' }}
             >
-              <X className="text-white" size={24} />
-            </button>
+              <X className="text-white" size={22} />
+            </motion.button>
             
-            {/* Image takes 90% of space */}
-            <div className="relative w-full h-[90%]">
+            <motion.div 
+              className="relative w-full h-[90%]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+            >
               <img 
                 src={artwork.imageUrl} 
                 alt={artwork.title}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain transform-gpu"
+                onLoad={() => setIsImageLoaded(true)}
+                style={{ 
+                  opacity: isImageLoaded ? 1 : 0,
+                  transition: 'opacity 0.5s ease-in-out'
+                }}
+                loading="lazy"
               />
-            </div>
+            </motion.div>
             
-            {/* Info panel at bottom - 10% with transparency */}
             <motion.div 
-              initial={{ y: 100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="absolute bottom-0 left-0 right-0 h-[10%] bg-gradient-to-t from-black/80 to-transparent backdrop-blur-sm p-6 flex items-center justify-between"
+              initial={{ y: 100 }}
+              animate={{ y: 0 }}
+              transition={{ 
+                type: "spring",
+                damping: 25,
+                stiffness: 200,
+                delay: 0.2
+              }}
+              className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-8"
             >
-              <div className="text-white">
-                <h3 className="text-2xl font-playfair mb-1">{artwork.title}</h3>
-                <p className="text-white/80 text-sm">
-                  {artwork.technique} • {artwork.dimensions} • {artwork.year}
-                </p>
-              </div>
-              <div className="text-right text-white/60 text-xs max-w-md">
-                <p className="line-clamp-2">{artwork.description}</p>
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-0">
+                <div className="text-white">
+                  <motion.h3 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-2xl md:text-3xl font-playfair mb-2"
+                  >
+                    {artwork.title}
+                  </motion.h3>
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.8 }}
+                    transition={{ delay: 0.5 }}
+                    className="text-base md:text-lg"
+                  >
+                    {artwork.technique} • {artwork.dimensions} • {artwork.year}
+                  </motion.p>
+                </div>
+                {/* Description cachée sur mobile */}
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.7 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-right text-base max-w-md hidden md:block"
+                >
+                  <p className="line-clamp-2">{artwork.description}</p>
+                </motion.div>
               </div>
             </motion.div>
           </motion.div>

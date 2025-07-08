@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -60,30 +60,25 @@ export default function Contact() {
     return (
       <>
         <div className="min-h-screen flex items-center justify-center py-24">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
+          <div
             className="text-center p-12 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 max-w-lg shadow-2xl"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: "spring" }}
+            <div
               className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6"
             >
               <Send className="text-green-400" size={32} />
-            </motion.div>
+            </div>
             <h2 className="text-3xl font-playfair mb-6 text-white">Message envoyé !</h2>
             <p className="text-lg text-white/80 mb-8">
               Merci pour votre message. Je vous répondrai dans les plus brefs délais.
             </p>
             <Button
               onClick={() => setIsSubmitted(false)}
-              className="bg-white/20 text-white border border-white/30 hover:bg-white/30 transition-all duration-300"
+              className="bg-white/10 text-black border border-black hover:bg-white/20 transition-all duration-300"
             >
               Envoyer un autre message
             </Button>
-          </motion.div>
+          </div>
         </div>
       </>
     );
@@ -91,12 +86,13 @@ export default function Contact() {
 
   return (
     <>
+      <Helmet>
+        <title>Contact - Ivan Gauthier</title>
+        <meta name="description" content="Contactez Ivan Gauthier pour toute demande d'information, d'exposition ou de collaboration artistique." />
+      </Helmet>
       <section className="min-h-screen py-24 px-8">
         <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
+          <div
             className="text-center mb-16"
           >
             <h1 className="text-5xl md:text-7xl font-playfair mb-6 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
@@ -106,25 +102,17 @@ export default function Contact() {
               Que ce soit pour un projet de collaboration, une acquisition d'œuvre ou toute autre demande, 
               n'hésitez pas à me contacter.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid lg:grid-cols-2 gap-16">
             {/* Contact Info */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-              className="space-y-8"
-            >
+            <div className="space-y-8">
               <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
                 <h3 className="text-2xl font-playfair mb-8 text-white">Informations de contact</h3>
                 <div className="space-y-6">
                   {contactInfo.map(({ icon: Icon, text, label }, index) => (
-                    <motion.div
+                    <div
                       key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 + index * 0.1, duration: 0.6 }}
                       className="flex items-center space-x-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300"
                     >
                       <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
@@ -134,32 +122,23 @@ export default function Contact() {
                         <p className="text-white/60 text-sm">{label}</p>
                         <p className="text-white text-lg">{text}</p>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.6 }}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
-              >
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
                 <h3 className="text-xl font-playfair mb-4 text-white">Horaires d'atelier</h3>
                 <p className="text-white/80">
                   Lundi - Vendredi : 9h00 - 18h00<br />
                   Samedi : Sur rendez-vous<br />
                   Dimanche : Fermé
                 </p>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
 
             {/* Contact Form */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
-            >
+            <div>
               <form
                 onSubmit={handleSubmit}
                 className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 space-y-6"
@@ -207,31 +186,28 @@ export default function Contact() {
                   </div>
                 </div>
                 
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="pt-4"
-                >
+                <div className="pt-4">
                   <Button
                     type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                    aria-label="Envoyer le message de contact"
                     disabled={submitMessage.isPending}
-                    className="w-full bg-gradient-to-r from-white/20 to-white/30 text-white border border-white/30 px-8 py-4 rounded-xl text-lg font-semibold hover:from-white/30 hover:to-white/40 transition-all duration-500 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
                   >
                     {submitMessage.isPending ? (
                       <span className="flex items-center space-x-2">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-white border-t-black rounded-full animate-spin" />
                         <span>Envoi en cours...</span>
                       </span>
                     ) : (
                       <span className="flex items-center space-x-2">
-                        <Send size={20} />
+                        <Send size={20} className="text-white" />
                         <span>Envoyer le message</span>
                       </span>
                     )}
                   </Button>
-                </motion.div>
+                </div>
               </form>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>

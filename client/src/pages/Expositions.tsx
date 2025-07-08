@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 import { useExhibitions } from "@/hooks/use-exhibitions";
+import { useLocation } from "wouter";
+import { Helmet } from "react-helmet-async";
 
 export default function Expositions() {
   const { data: exhibitions, isLoading } = useExhibitions();
+  const [, setLocation] = useLocation();
 
   if (isLoading) {
     return (
@@ -34,50 +37,58 @@ export default function Expositions() {
   }
 
   return (
-    <section className="min-h-screen py-16 px-4">
-      <div className="max-w-6xl mx-auto">
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-4xl font-playfair text-center mb-16"
-        >
-          Expositions
-        </motion.h2>
-        
-        <div className="space-y-12">
-          {exhibitions.map((exhibition, index) => (
-            <motion.div
-              key={exhibition.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.2, duration: 0.8 }}
-              className="group cursor-pointer relative overflow-hidden rounded-xl h-96"
-            >
-              <img 
-                src={exhibition.imageUrl} 
-                alt={`${exhibition.title} Exhibition`}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-[hsl(210,40%,12%)] bg-opacity-40 group-hover:bg-opacity-20 transition-all duration-500" />
-              <motion.div 
-                className="absolute inset-0 flex items-center justify-center"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.3 }}
+    <>
+      <Helmet>
+        <title>Expositions - Ivan Gauthier</title>
+        <meta name="description" content="Retrouvez toutes les expositions passées et à venir d'Ivan Gauthier, artiste contemporain." />
+      </Helmet>
+      <section className="min-h-screen pt-32 pb-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-4xl font-playfair text-center mb-16"
+          >
+            Expositions
+          </motion.h2>
+          
+          <div className="space-y-12">
+            {exhibitions.map((exhibition, index) => (
+              <motion.div
+                key={exhibition.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.2, duration: 0.8 }}
+                className="group cursor-pointer relative overflow-hidden rounded-xl h-96"
+                onClick={() => setLocation(`/expositions/${exhibition.id}`)}
               >
-                <div className="text-center">
-                  <h3 className="text-5xl font-playfair text-white mb-4 drop-shadow-lg">
-                    {exhibition.title}
-                  </h3>
-                  <p className="text-xl text-white opacity-80">
-                    {exhibition.location} • {exhibition.year}
-                  </p>
-                </div>
+                <img 
+                  src={exhibition.imageUrl} 
+                  alt={exhibition.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-[hsl(210,40%,12%)] bg-opacity-40 group-hover:bg-opacity-20 transition-all duration-500" />
+                <motion.div 
+                  className="absolute inset-0 flex items-center justify-center"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="text-center">
+                    <h3 className="text-5xl font-playfair text-white mb-4 drop-shadow-lg">
+                      {exhibition.title}
+                    </h3>
+                    <p className="text-xl text-white opacity-80">
+                      {exhibition.location} • {exhibition.year}
+                    </p>
+                  </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
