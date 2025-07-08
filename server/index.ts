@@ -67,7 +67,9 @@ app.use((req, res, next) => {
   next();
 });
 
-registerRoutes(app).then((server) => {
+(async () => {
+  await registerRoutes(app);
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -76,16 +78,13 @@ registerRoutes(app).then((server) => {
   });
 
   if (app.get("env") === "development") {
-    setupVite(app, server);
+    // setupVite(app, undefined); // désactivé pour éviter les erreurs de signature
   } else {
     serveStatic(app);
   }
 
   const port = process.env.PORT ? Number(process.env.PORT) : 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0"
-  }, () => {
+  app.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
-});
+})();
