@@ -19,11 +19,14 @@ import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ARTWORKS_PATH = path.join(__dirname, "artworks.json");
-const EXHIBITIONS_PATH = path.join(__dirname, "exhibitions.json");
-const SLOTS_PATH = path.join(__dirname, "slots.json");
-const FEATURED_PATH = path.join(__dirname, "featured.json");
-const FEATURED_WORKS_PATH = path.join(__dirname, "featured-works.json");
+// Correction : pointer toujours sur la racine du projet
+const projectRoot = path.resolve(__dirname, "..");
+
+const ARTWORKS_PATH = path.join(projectRoot, "server", "artworks.json");
+const EXHIBITIONS_PATH = path.join(projectRoot, "server", "exhibitions.json");
+const SLOTS_PATH = path.join(projectRoot, "server", "slots.json");
+const FEATURED_PATH = path.join(projectRoot, "server", "featured.json");
+const FEATURED_WORKS_PATH = path.join(projectRoot, "server", "featured-works.json");
 
 export interface FeaturedWork {
   id: number;

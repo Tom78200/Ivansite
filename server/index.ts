@@ -9,6 +9,11 @@ import helmet from "helmet";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const isProd = process.env.NODE_ENV === "production";
+const imagesPath = isProd
+  ? path.join(__dirname, "public/images")
+  : path.join(__dirname, "../public/images");
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -22,10 +27,29 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 2 // 2h
   }
 }));
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://www.youtube.com", "https://replit.com"],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "https://www.googleapis.com",
+        "https://www.galerie-breheret.com",
+        "https://i-de.unimedias.fr"
+      ],
+      frameSrc: ["'self'", "https://www.youtube.com"],
+      connectSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    }
+  }
+}));
 
 // Servir les images statiques
-app.use("/images", express.static(path.join(__dirname, "../public/images")));
+app.use("/images", express.static(imagesPath));
 
 // Cache images et assets statiques
 app.use("/images", (req, res, next) => {
