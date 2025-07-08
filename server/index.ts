@@ -1,10 +1,41 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
+import { fileURLToPath } from 'url';
+import session from "express-session";
+import helmet from "helmet";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(session({
+  secret: "Guthier2024!_SESSION_SECRET_@2024", // à changer pour production
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false, // mettre true si HTTPS
+    maxAge: 1000 * 60 * 60 * 2 // 2h
+  }
+}));
+app.use(helmet());
+
+// Servir les images statiques
+app.use("/images", express.static(path.join(__dirname, "../public/images")));
+
+// Cache images et assets statiques
+app.use("/images", (req, res, next) => {
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  next();
+});
+app.use("/assets", (req, res, next) => {
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -59,11 +90,10 @@ app.use((req, res, next) => {
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = 5000;
+  const port = process.env.PORT ? Number(process.env.PORT) : 5000;
   server.listen({
     port,
-    host: "0.0.0.0",
-    reusePort: true,
+    host: "0.0.0.0"
   }, () => {
     log(`serving on port ${port}`);
   });

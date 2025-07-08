@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -17,6 +17,8 @@ export const artworks = pgTable("artworks", {
   year: text("year").notNull(),
   description: text("description").notNull(),
   isVisible: boolean("is_visible").default(true),
+  showInSlider: boolean("show_in_slider").default(true),
+  order: integer("order").notNull().default(0),
 });
 
 export const exhibitions = pgTable("exhibitions", {
@@ -26,7 +28,7 @@ export const exhibitions = pgTable("exhibitions", {
   year: text("year").notNull(),
   imageUrl: text("image_url").notNull(),
   description: text("description").notNull(),
-  galleryImages: text("gallery_images").array(),
+  galleryImages: jsonb("gallery_images").array(),
   videoUrl: text("video_url"),
 });
 
