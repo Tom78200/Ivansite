@@ -24,13 +24,13 @@ export default defineConfig({
       "@assets": path.resolve(__dirname, "attached_assets"),
     },
   },
-  root: path.resolve(__dirname, "client"),
+  root: "client",
   build: {
+    outDir: "../dist/public",
+    emptyOutDir: true,
     target: 'esnext',
     minify: 'esbuild',
     cssMinify: true,
-    outDir: path.resolve(__dirname, "dist/public"),
-    emptyOutDir: true,
     rollupOptions: {
       output: {
         manualChunks: {
