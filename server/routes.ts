@@ -281,7 +281,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/exhibitions/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const exhibition = await storage.getExhibition(id);
+      let exhibition = await storage.getExhibition(id);
+      
+      // Essayer de lire depuis Supabase si pas trouvé localement
+      if (!exhibition && supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('exhibitions')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (data && !error) {
+            exhibition = {
+              id: data.id,
+              title: data.title,
+              location: data.location,
+              year: data.year,
+              imageUrl: data.image_url,
+              description: data.description,
+              galleryImages: data.gallery_images || [],
+              videoUrl: data.video_url,
+              order: data.order
+            };
+          }
+        } catch (e) {
+          console.warn('Erreur lecture Supabase exhibition:', e);
+        }
+      }
+      
       if (!exhibition) {
         return res.status(404).json({ error: "Exhibition not found" });
       }
@@ -470,8 +498,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!Array.isArray(galleryImages)) {
         return res.status(400).json({ error: "Format de galerie invalide" });
       }
+      
       // Récupérer l'exposition existante pour détecter les suppressions
-      const existingExpo = await storage.getExhibition(id);
+      let existingExpo = await storage.getExhibition(id);
+      
+      // Essayer de lire depuis Supabase si pas trouvé localement
+      if (!existingExpo && supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('exhibitions')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (data && !error) {
+            existingExpo = {
+              id: data.id,
+              title: data.title,
+              location: data.location,
+              year: data.year,
+              imageUrl: data.image_url,
+              description: data.description,
+              galleryImages: data.gallery_images || [],
+              videoUrl: data.video_url,
+              order: data.order
+            };
+            console.log("[DEBUG] Exposition trouvée dans Supabase:", existingExpo.title);
+          }
+        } catch (e) {
+          console.warn('Erreur lecture Supabase exhibition pour galerie:', e);
+        }
+      }
       // Déterminer les URLs supprimées
       const previousUrls = new Set((existingExpo?.galleryImages || []).map((g: any) => g.url).filter(Boolean));
       const nextUrls = new Set(galleryImages.map((g: any) => g.url).filter(Boolean));
