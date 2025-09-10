@@ -467,6 +467,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Format invalide" });
       }
       await storage.reorderArtworks(newOrder);
+      
+      // Sauvegarder aussi dans Supabase pour la persistance
+      if (supabase) {
+        try {
+          for (const { id, order } of newOrder) {
+            await supabase.from('artworks').update({ order }).eq('id', id);
+          }
+        } catch (e) {
+          console.warn('Erreur sauvegarde Supabase order:', e);
+        }
+      }
+      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Erreur lors du réordonnancement" });
