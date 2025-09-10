@@ -211,7 +211,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all exhibitions
   app.get("/api/exhibitions", async (req, res) => {
     try {
-      const exhibitions = await storage.getExhibitions();
+      let exhibitions;
+      
+      // Essayer de lire depuis Supabase d'abord
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('exhibitions')
+            .select('*')
+            .order('order', { ascending: true });
+          
+          if (!error && data) {
+            exhibitions = data.map(exhibition => ({
+              id: exhibition.id,
+              title: exhibition.title,
+              location: exhibition.location,
+              year: exhibition.year,
+              imageUrl: exhibition.image_url,
+              description: exhibition.description,
+              galleryImages: exhibition.gallery_images || [],
+              videoUrl: exhibition.video_url,
+              order: exhibition.order
+            }));
+          }
+        } catch (e) {
+          console.warn('Erreur lecture Supabase exhibitions:', e);
+        }
+      }
+      
+      // Fallback vers le storage local si Supabase échoue
+      if (!exhibitions) {
+        exhibitions = await storage.getExhibitions();
+      }
+      
       res.setHeader("Cache-Control", "no-store");
       res.json(exhibitions);
     } catch (error) {
@@ -227,6 +259,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Format invalide" });
       }
       await storage.reorderExhibitions(newOrder);
+      
+      // Sauvegarder aussi dans Supabase pour la persistance
+      if (supabase) {
+        try {
+          for (const { id, order } of newOrder) {
+            await supabase.from('exhibitions').update({ order }).eq('id', id);
+          }
+        } catch (e) {
+          console.warn('Erreur sauvegarde Supabase exhibitions order:', e);
+        }
+      }
+      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Erreur lors du réordonnancement des expositions" });
@@ -252,6 +296,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertExhibitionSchema.parse(req.body);
       const exhibition = await storage.createExhibition(validatedData);
+      
+      // Sauvegarder aussi dans Supabase pour la persistance
+      if (supabase) {
+        try {
+          await supabase.from('exhibitions').insert({
+            id: exhibition.id,
+            title: exhibition.title,
+            location: exhibition.location,
+            year: exhibition.year,
+            image_url: exhibition.imageUrl,
+            description: exhibition.description,
+            gallery_images: exhibition.galleryImages || [],
+            video_url: exhibition.videoUrl || null,
+            order: exhibition.order
+          });
+        } catch (e) {
+          console.warn('Erreur sauvegarde Supabase exhibition:', e);
+        }
+      }
+      
       res.status(201).json(exhibition);
     } catch (error) {
       res.status(400).json({ error: "Invalid exhibition data" });
@@ -393,6 +457,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!expo) {
         return res.status(404).json({ error: "Exposition non trouvée" });
       }
+      
+      // Sauvegarder aussi dans Supabase pour la persistance
+      if (supabase) {
+        try {
+          await supabase.from('exhibitions').update({
+            gallery_images: galleryImages
+          }).eq('id', id);
+        } catch (e) {
+          console.warn('Erreur sauvegarde Supabase gallery:', e);
+        }
+      }
+      
       res.json(expo);
     } catch (error) {
       res.status(500).json({ error: "Erreur lors de la mise à jour de la galerie" });
