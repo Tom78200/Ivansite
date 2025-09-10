@@ -7,6 +7,20 @@ import { registerRoutes } from "../server/routes";
 // Vercel serverless handler wrapping our Express app
 const app = express();
 
+// CORS headers for Vercel
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // Behind Vercel proxy, trust X-Forwarded-* to set secure cookies correctly
