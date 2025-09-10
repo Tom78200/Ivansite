@@ -87,6 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // TOUJOURS lire depuis le storage local d'abord pour que ça marche
       const artworks = await storage.getArtworks();
+      console.log(`[ARTWORKS] Local artworks count: ${artworks.length}`);
       
       // Essayer de lire depuis Supabase en parallèle (sans bloquer)
       if (supabase) {
@@ -96,6 +97,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .select('*')
             .eq('is_visible', true)
             .order('order', { ascending: true });
+          
+          console.log(`[ARTWORKS] Supabase artworks count: ${data?.length || 0}`);
           
           if (!error && data && data.length > 0) {
             // Si Supabase a des données, les utiliser
@@ -111,6 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               showInSlider: artwork.show_in_slider,
               order: artwork.order
             }));
+            console.log(`[ARTWORKS] Returning Supabase artworks: ${supabaseArtworks.length}`);
             return res.json(supabaseArtworks);
           }
         } catch (e) {
@@ -118,8 +122,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      console.log(`[ARTWORKS] Returning local artworks: ${artworks.length}`);
       res.json(artworks);
     } catch (error) {
+      console.error('[ARTWORKS] Error:', error);
       res.status(500).json({ error: "Failed to fetch artworks" });
     }
   });
