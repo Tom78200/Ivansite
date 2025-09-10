@@ -97,6 +97,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .order('order', { ascending: true });
           
           if (!error && data) {
+            console.log(`[READ] ${data.length} artworks trouvés dans Supabase`);
             artworks = data.map(artwork => ({
               id: artwork.id,
               title: artwork.title,
@@ -109,6 +110,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               showInSlider: artwork.show_in_slider,
               order: artwork.order
             }));
+          } else {
+            console.log('[READ] Erreur Supabase:', error);
           }
         } catch (e) {
           console.warn('Erreur lecture Supabase artworks:', e);
@@ -117,9 +120,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fallback vers le storage local si Supabase échoue
       if (!artworks) {
+        console.log('[READ] Fallback vers storage local');
         artworks = await storage.getArtworks();
       }
       
+      console.log(`[READ] Retour de ${artworks?.length || 0} artworks`);
       res.json(artworks);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch artworks" });
