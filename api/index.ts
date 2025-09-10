@@ -9,6 +9,8 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+// Behind Vercel proxy, trust X-Forwarded-* to set secure cookies correctly
+app.set("trust proxy", 1);
 
 app.use(helmet({
   contentSecurityPolicy: {
@@ -33,7 +35,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 1000 * 60 * 60 * 2,
   },
