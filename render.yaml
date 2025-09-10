@@ -4,9 +4,8 @@ services:
     env: node
     region: frankfurt
     plan: free
-    buildCommand: npm install && npm run build && npm run build:client
+    buildCommand: npm run build && npm run build:client
     startCommand: npm start
-    runtime: node
     nodeVersion: 20
     healthCheckPath: /
     autoDeploy: true
@@ -23,7 +22,6 @@ services:
         value: Guthier2024!
       - key: SESSION_SECRET
         generateValue: true
-      # SMTP (optionnel)
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
