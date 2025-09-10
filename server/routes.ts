@@ -364,6 +364,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!deleted) {
         return res.status(404).json({ error: "Artwork not found" });
       }
+      
+      // Supprimer aussi de Supabase pour la persistance
+      if (supabase) {
+        try {
+          await supabase.from('artworks').delete().eq('id', id);
+        } catch (e) {
+          console.warn('Erreur suppression Supabase artwork:', e);
+        }
+      }
+      
       if (supabase && existing?.imageUrl && existing.imageUrl.startsWith("http")) {
         try { await deleteSupabasePublicFile(existing.imageUrl); } catch {}
       }
@@ -483,6 +493,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deleted = await storage.deleteExhibition(id);
       if (!deleted) {
         return res.status(404).json({ error: "Exposition non trouvée" });
+      }
+      
+      // Supprimer aussi de Supabase pour la persistance
+      if (supabase) {
+        try {
+          await supabase.from('exhibitions').delete().eq('id', id);
+        } catch (e) {
+          console.warn('Erreur suppression Supabase exhibition:', e);
+        }
       }
       if (existing) {
         // Supprimer l'image de couverture
