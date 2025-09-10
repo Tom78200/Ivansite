@@ -30,33 +30,8 @@ app.use(session({
   }
 }));
 
-// Sécurité: CSP assouplie en développement pour permettre Vite/HMR
-if (app.get("env") === "development") {
-  app.use(helmet({ contentSecurityPolicy: false }));
-} else {
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "https://www.youtube.com", "https://replit.com"],
-        imgSrc: [
-          "'self'",
-          "data:",
-          "https://*.supabase.co",
-          "https://images.pexels.com",
-          "https://www.googleapis.com",
-          "https://www.galerie-breheret.com",
-          "https://i-de.unimedias.fr"
-        ],
-        frameSrc: ["'self'", "https://www.youtube.com"],
-        connectSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        objectSrc: ["'none'"],
-        upgradeInsecureRequests: [],
-      }
-    }
-  }));
-}
+// CSP temporairement désactivée pour tester les images
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // Servir les images statiques
 app.use("/images", express.static(imagesPath));
