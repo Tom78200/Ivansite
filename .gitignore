@@ -25,4 +25,4 @@ Thumbs.db
 # Misc
 public/images/*
 !public/images/.gitkeep
-server/*.json
+.vercel
