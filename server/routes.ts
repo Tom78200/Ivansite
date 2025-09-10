@@ -125,6 +125,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log(`[READ] Retour de ${artworks?.length || 0} artworks`);
+      
+      // Ajouter des headers pour éviter le cache
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
       res.json(artworks);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch artworks" });
@@ -154,6 +160,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(diagnostics);
     } catch (e: any) {
       res.status(500).json({ error: e.message || "Diagnostics failed" });
+    }
+  });
+
+  // Test direct Supabase (admin)
+  app.get("/api/test/supabase-artworks", requireAdmin, async (_req, res) => {
+    try {
+      if (!supabase) {
+        return res.json({ error: "Supabase non configuré" });
+      }
+      
+      const { data, error } = await supabase
+        .from('artworks')
+        .select('*')
+        .order('id', { ascending: false });
+      
+      res.json({
+        error: error?.message || null,
+        count: data?.length || 0,
+        artworks: data || []
+      });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || "Test failed" });
     }
   });
 
