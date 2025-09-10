@@ -177,31 +177,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create artwork
-  app.post("/api/artworks", async (req, res) => {
+  app.post("/api/artworks", requireAdmin, async (req, res) => {
     try {
       const validatedData = insertArtworkSchema.parse(req.body);
-      const artwork = await storage.createArtwork(validatedData);
       
-      // Sauvegarder aussi dans Supabase pour la persistance
+      // Créer directement dans Supabase si disponible
       if (supabase) {
         try {
-          await supabase.from('artworks').insert({
-            id: artwork.id,
-            title: artwork.title,
-            image_url: artwork.imageUrl,
-            dimensions: artwork.dimensions,
-            technique: artwork.technique,
-            year: artwork.year,
-            description: artwork.description,
-            is_visible: artwork.isVisible,
-            show_in_slider: artwork.showInSlider,
-            order: artwork.order
-          });
+          // Générer un ID unique
+          const id = Date.now();
+          
+          const { data, error } = await supabase.from('artworks').insert({
+            id: id,
+            title: validatedData.title,
+            image_url: validatedData.imageUrl,
+            dimensions: validatedData.dimensions,
+            technique: validatedData.technique,
+            year: validatedData.year,
+            description: validatedData.description,
+            is_visible: validatedData.isVisible ?? true,
+            show_in_slider: validatedData.showInSlider ?? true,
+            order: validatedData.order ?? 0
+          }).select().single();
+          
+          if (error) throw error;
+          
+          // Convertir au format attendu par le frontend
+          const artwork = {
+            id: data.id,
+            title: data.title,
+            imageUrl: data.image_url,
+            dimensions: data.dimensions,
+            technique: data.technique,
+            year: data.year,
+            description: data.description,
+            isVisible: data.is_visible,
+            showInSlider: data.show_in_slider,
+            order: data.order
+          };
+          
+          return res.status(201).json(artwork);
         } catch (e) {
-          console.warn('Erreur sauvegarde Supabase artwork:', e);
+          console.warn('Erreur création Supabase artwork:', e);
+          // Fallback vers le storage local si Supabase échoue
         }
       }
       
+      // Fallback: créer dans le storage local
+      const artwork = await storage.createArtwork(validatedData);
       res.status(201).json(artwork);
     } catch (error) {
       res.status(400).json({ error: "Invalid artwork data" });
@@ -295,27 +318,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/exhibitions", requireAdmin, async (req, res) => {
     try {
       const validatedData = insertExhibitionSchema.parse(req.body);
-      const exhibition = await storage.createExhibition(validatedData);
       
-      // Sauvegarder aussi dans Supabase pour la persistance
+      // Créer directement dans Supabase si disponible
       if (supabase) {
         try {
-          await supabase.from('exhibitions').insert({
-            id: exhibition.id,
-            title: exhibition.title,
-            location: exhibition.location,
-            year: exhibition.year,
-            image_url: exhibition.imageUrl,
-            description: exhibition.description,
-            gallery_images: exhibition.galleryImages || [],
-            video_url: exhibition.videoUrl || null,
-            order: exhibition.order
-          });
+          // Générer un ID unique
+          const id = Date.now();
+          
+          const { data, error } = await supabase.from('exhibitions').insert({
+            id: id,
+            title: validatedData.title,
+            location: validatedData.location,
+            year: validatedData.year,
+            image_url: validatedData.imageUrl,
+            description: validatedData.description,
+            gallery_images: validatedData.galleryImages || [],
+            video_url: validatedData.videoUrl || null,
+            order: validatedData.order ?? 0
+          }).select().single();
+          
+          if (error) throw error;
+          
+          // Convertir au format attendu par le frontend
+          const exhibition = {
+            id: data.id,
+            title: data.title,
+            location: data.location,
+            year: data.year,
+            imageUrl: data.image_url,
+            description: data.description,
+            galleryImages: data.gallery_images || [],
+            videoUrl: data.video_url,
+            order: data.order
+          };
+          
+          return res.status(201).json(exhibition);
         } catch (e) {
-          console.warn('Erreur sauvegarde Supabase exhibition:', e);
+          console.warn('Erreur création Supabase exhibition:', e);
+          // Fallback vers le storage local si Supabase échoue
         }
       }
       
+      // Fallback: créer dans le storage local
+      const exhibition = await storage.createExhibition(validatedData);
       res.status(201).json(exhibition);
     } catch (error) {
       res.status(400).json({ error: "Invalid exhibition data" });
