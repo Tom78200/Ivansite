@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 const isProd = process.env.NODE_ENV === "production";
 const imagesPath = isProd
-  ? path.join(__dirname, "public/images")
+  ? path.join(__dirname, "../dist/public/images")
   : path.join(__dirname, "../public/images");
 
 const app = express();
@@ -42,6 +42,7 @@ if (app.get("env") === "development") {
         imgSrc: [
           "'self'",
           "data:",
+          "https://*.supabase.co",
           "https://www.googleapis.com",
           "https://www.galerie-breheret.com",
           "https://i-de.unimedias.fr"
