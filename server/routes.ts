@@ -322,13 +322,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create exhibition
   app.post("/api/exhibitions", requireAdmin, async (req, res) => {
     try {
+      console.log("[CREATE] Tentative création exposition:", req.body);
       const validatedData = insertExhibitionSchema.parse(req.body);
       const exhibition = await storage.createExhibition(validatedData);
+      console.log("[CREATE] Exposition créée localement:", exhibition.id);
       
-      // Sauvegarder aussi dans Supabase pour la persistance
+      // Sauvegarder aussi dans Supabase pour la persistance (sans bloquer)
       if (supabase) {
         try {
-          await supabase.from('exhibitions').insert({
+          const result = await supabase.from('exhibitions').insert({
             id: exhibition.id,
             title: exhibition.title,
             location: exhibition.location,
@@ -339,13 +341,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             video_url: exhibition.videoUrl || null,
             order: exhibition.order
           });
+          console.log("[CREATE] Exposition sauvegardée dans Supabase:", result);
         } catch (e) {
-          console.warn('Erreur sauvegarde Supabase exhibition:', e);
+          console.warn('[CREATE] Erreur sauvegarde Supabase exhibition (non bloquant):', e);
         }
       }
       
       res.status(201).json(exhibition);
     } catch (error) {
+      console.error('[CREATE] Erreur création exposition:', error);
       res.status(400).json({ error: "Invalid exhibition data" });
     }
   });
