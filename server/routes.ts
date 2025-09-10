@@ -85,9 +85,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all artworks
   app.get("/api/artworks", async (req, res) => {
     try {
-      let artworks;
+      // TOUJOURS lire depuis le storage local d'abord pour que ça marche
+      const artworks = await storage.getArtworks();
       
-      // Essayer de lire depuis Supabase d'abord
+      // Essayer de lire depuis Supabase en parallèle (sans bloquer)
       if (supabase) {
         try {
           const { data, error } = await supabase
@@ -96,8 +97,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .eq('is_visible', true)
             .order('order', { ascending: true });
           
-          if (!error && data) {
-            artworks = data.map(artwork => ({
+          if (!error && data && data.length > 0) {
+            // Si Supabase a des données, les utiliser
+            const supabaseArtworks = data.map(artwork => ({
               id: artwork.id,
               title: artwork.title,
               imageUrl: artwork.image_url,
@@ -109,15 +111,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               showInSlider: artwork.show_in_slider,
               order: artwork.order
             }));
+            return res.json(supabaseArtworks);
           }
         } catch (e) {
-          console.warn('Erreur lecture Supabase artworks:', e);
+          console.warn('Erreur lecture Supabase artworks (fallback local):', e);
         }
-      }
-      
-      // Fallback vers le storage local si Supabase échoue
-      if (!artworks) {
-        artworks = await storage.getArtworks();
       }
       
       res.json(artworks);
