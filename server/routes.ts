@@ -85,7 +85,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all artworks
   app.get("/api/artworks", async (req, res) => {
     try {
-      const artworks = await storage.getArtworks();
+      let artworks;
+      
+      // Essayer de lire depuis Supabase d'abord
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('artworks')
+            .select('*')
+            .eq('is_visible', true)
+            .order('order', { ascending: true });
+          
+          if (!error && data) {
+            artworks = data.map(artwork => ({
+              id: artwork.id,
+              title: artwork.title,
+              imageUrl: artwork.image_url,
+              dimensions: artwork.dimensions,
+              technique: artwork.technique,
+              year: artwork.year,
+              description: artwork.description,
+              isVisible: artwork.is_visible,
+              showInSlider: artwork.show_in_slider,
+              order: artwork.order
+            }));
+          }
+        } catch (e) {
+          console.warn('Erreur lecture Supabase artworks:', e);
+        }
+      }
+      
+      // Fallback vers le storage local si Supabase échoue
+      if (!artworks) {
+        artworks = await storage.getArtworks();
+      }
+      
       res.json(artworks);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch artworks" });
@@ -118,28 +152,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test direct Supabase (admin)
-  app.get("/api/test/supabase-artworks", requireAdmin, async (_req, res) => {
-    try {
-      if (!supabase) {
-        return res.json({ error: "Supabase non configuré" });
-      }
-      
-      const { data, error } = await supabase
-        .from('artworks')
-        .select('*')
-        .order('id', { ascending: false });
-      
-      res.json({
-        error: error?.message || null,
-        count: data?.length || 0,
-        artworks: data || []
-      });
-    } catch (e: any) {
-      res.status(500).json({ error: e.message || "Test failed" });
-    }
-  });
-
   // Sauvegarder les slots
   app.put("/api/artworks/slots", requireAdmin, async (req, res) => {
     const slots = req.body;
@@ -165,10 +177,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create artwork
-  app.post("/api/artworks", requireAdmin, async (req, res) => {
+  app.post("/api/artworks", async (req, res) => {
     try {
       const validatedData = insertArtworkSchema.parse(req.body);
       const artwork = await storage.createArtwork(validatedData);
+      
+      // Sauvegarder aussi dans Supabase pour la persistance
+      if (supabase) {
+        try {
+          await supabase.from('artworks').insert({
+            id: artwork.id,
+            title: artwork.title,
+            image_url: artwork.imageUrl,
+            dimensions: artwork.dimensions,
+            technique: artwork.technique,
+            year: artwork.year,
+            description: artwork.description,
+            is_visible: artwork.isVisible,
+            show_in_slider: artwork.showInSlider,
+            order: artwork.order
+          });
+        } catch (e) {
+          console.warn('Erreur sauvegarde Supabase artwork:', e);
+        }
+      }
+      
       res.status(201).json(artwork);
     } catch (error) {
       res.status(400).json({ error: "Invalid artwork data" });
@@ -178,7 +211,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all exhibitions
   app.get("/api/exhibitions", async (req, res) => {
     try {
-      const exhibitions = await storage.getExhibitions();
+      let exhibitions;
+      
+      // Essayer de lire depuis Supabase d'abord
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('exhibitions')
+            .select('*')
+            .order('order', { ascending: true });
+          
+          if (!error && data) {
+            exhibitions = data.map(exhibition => ({
+              id: exhibition.id,
+              title: exhibition.title,
+              location: exhibition.location,
+              year: exhibition.year,
+              imageUrl: exhibition.image_url,
+              description: exhibition.description,
+              galleryImages: exhibition.gallery_images || [],
+              videoUrl: exhibition.video_url,
+              order: exhibition.order
+            }));
+          }
+        } catch (e) {
+          console.warn('Erreur lecture Supabase exhibitions:', e);
+        }
+      }
+      
+      // Fallback vers le storage local si Supabase échoue
+      if (!exhibitions) {
+        exhibitions = await storage.getExhibitions();
+      }
+      
       res.setHeader("Cache-Control", "no-store");
       res.json(exhibitions);
     } catch (error) {
@@ -194,6 +259,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Format invalide" });
       }
       await storage.reorderExhibitions(newOrder);
+      
+      // Sauvegarder aussi dans Supabase pour la persistance
+      if (supabase) {
+        try {
+          for (const { id, order } of newOrder) {
+            await supabase.from('exhibitions').update({ order }).eq('id', id);
+          }
+        } catch (e) {
+          console.warn('Erreur sauvegarde Supabase exhibitions order:', e);
+        }
+      }
+      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Erreur lors du réordonnancement des expositions" });
@@ -219,6 +296,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertExhibitionSchema.parse(req.body);
       const exhibition = await storage.createExhibition(validatedData);
+      
+      // Sauvegarder aussi dans Supabase pour la persistance
+      if (supabase) {
+        try {
+          await supabase.from('exhibitions').insert({
+            id: exhibition.id,
+            title: exhibition.title,
+            location: exhibition.location,
+            year: exhibition.year,
+            image_url: exhibition.imageUrl,
+            description: exhibition.description,
+            gallery_images: exhibition.galleryImages || [],
+            video_url: exhibition.videoUrl || null,
+            order: exhibition.order
+          });
+        } catch (e) {
+          console.warn('Erreur sauvegarde Supabase exhibition:', e);
+        }
+      }
+      
       res.status(201).json(exhibition);
     } catch (error) {
       res.status(400).json({ error: "Invalid exhibition data" });
@@ -262,14 +359,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/artworks/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const existing = await storage.getArtwork(id);
-      const deleted = await storage.deleteArtwork(id);
-      if (!deleted) {
+      console.log(`[DELETE] Tentative suppression artwork ID: ${id}`);
+      
+      let existing = await storage.getArtwork(id);
+      let foundInSupabase = false;
+      
+      // Vérifier d'abord dans Supabase si l'œuvre existe
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('artworks')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (data && !error) {
+            foundInSupabase = true;
+            console.log(`[DELETE] Artwork ${id} trouvé dans Supabase: ${data.title}`);
+            
+            // Supprimer de Supabase
+            await supabase.from('artworks').delete().eq('id', id);
+            
+            // Supprimer l'image si elle est sur Supabase
+            if (data.image_url && data.image_url.startsWith("http")) {
+              try {
+                await deleteSupabasePublicFile(data.image_url);
+              } catch (e) {
+                console.warn('Erreur suppression image Supabase:', e);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Erreur vérification Supabase:', e);
+        }
+      }
+      
+      // Supprimer du storage local si trouvé
+      if (existing) {
+        console.log(`[DELETE] Artwork trouvé localement: ${existing.title}`);
+        const deleted = await storage.deleteArtwork(id);
+        if (!deleted) {
+          console.log(`[DELETE] Échec suppression artwork ${id} du storage local`);
+        }
+      }
+      
+      // Si ni Supabase ni local, erreur
+      if (!foundInSupabase && !existing) {
+        console.log(`[DELETE] Artwork ${id} non trouvé nulle part`);
         return res.status(404).json({ error: "Artwork not found" });
       }
-      if (supabase && existing?.imageUrl && existing.imageUrl.startsWith("http")) {
-        try { await deleteSupabasePublicFile(existing.imageUrl); } catch {}
-      }
+      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete artwork" });
@@ -360,6 +499,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!expo) {
         return res.status(404).json({ error: "Exposition non trouvée" });
       }
+      
+      // Sauvegarder aussi dans Supabase pour la persistance
+      if (supabase) {
+        try {
+          await supabase.from('exhibitions').update({
+            gallery_images: galleryImages
+          }).eq('id', id);
+        } catch (e) {
+          console.warn('Erreur sauvegarde Supabase gallery:', e);
+        }
+      }
+      
       res.json(expo);
     } catch (error) {
       res.status(500).json({ error: "Erreur lors de la mise à jour de la galerie" });
@@ -374,6 +525,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deleted = await storage.deleteExhibition(id);
       if (!deleted) {
         return res.status(404).json({ error: "Exposition non trouvée" });
+      }
+      
+      // Supprimer aussi de Supabase pour la persistance
+      if (supabase) {
+        try {
+          await supabase.from('exhibitions').delete().eq('id', id);
+        } catch (e) {
+          console.warn('Erreur suppression Supabase exhibition:', e);
+        }
       }
       if (existing) {
         // Supprimer l'image de couverture
@@ -429,10 +589,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/artworks/order", requireAdmin, async (req, res) => {
     try {
       const newOrder = req.body;
+      console.log("[DEBUG] Reorder artworks reçu:", JSON.stringify(newOrder));
       if (!Array.isArray(newOrder)) {
         return res.status(400).json({ error: "Format invalide" });
       }
       await storage.reorderArtworks(newOrder);
+      
+      // Sauvegarder aussi dans Supabase pour la persistance
+      if (supabase) {
+        try {
+          for (const { id, order } of newOrder) {
+            await supabase.from('artworks').update({ order }).eq('id', id);
+          }
+        } catch (e) {
+          console.warn('Erreur sauvegarde Supabase order:', e);
+        }
+      }
+      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Erreur lors du réordonnancement" });
