@@ -356,12 +356,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete artwork
-  app.delete("/api/artworks/:id", async (req, res) => {
+  app.delete("/api/artworks/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log(`[DELETE] Tentative suppression artwork ID: ${id}`);
+      
       const existing = await storage.getArtwork(id);
+      if (!existing) {
+        console.log(`[DELETE] Artwork ${id} non trouvé`);
+        return res.status(404).json({ error: "Artwork not found" });
+      }
+      
+      console.log(`[DELETE] Artwork trouvé: ${existing.title}`);
       const deleted = await storage.deleteArtwork(id);
       if (!deleted) {
+        console.log(`[DELETE] Échec suppression artwork ${id}`);
         return res.status(404).json({ error: "Artwork not found" });
       }
       
