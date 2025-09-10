@@ -85,7 +85,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all artworks
   app.get("/api/artworks", async (req, res) => {
     try {
-      const artworks = await storage.getArtworks();
+      let artworks;
+      
+      // Essayer de lire depuis Supabase d'abord
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('artworks')
+            .select('*')
+            .eq('is_visible', true)
+            .order('order', { ascending: true });
+          
+          if (!error && data) {
+            artworks = data.map(artwork => ({
+              id: artwork.id,
+              title: artwork.title,
+              imageUrl: artwork.image_url,
+              dimensions: artwork.dimensions,
+              technique: artwork.technique,
+              year: artwork.year,
+              description: artwork.description,
+              isVisible: artwork.is_visible,
+              showInSlider: artwork.show_in_slider,
+              order: artwork.order
+            }));
+          }
+        } catch (e) {
+          console.warn('Erreur lecture Supabase artworks:', e);
+        }
+      }
+      
+      // Fallback vers le storage local si Supabase échoue
+      if (!artworks) {
+        artworks = await storage.getArtworks();
+      }
+      
       res.json(artworks);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch artworks" });
@@ -147,6 +181,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertArtworkSchema.parse(req.body);
       const artwork = await storage.createArtwork(validatedData);
+      
+      // Sauvegarder aussi dans Supabase pour la persistance
+      if (supabase) {
+        try {
+          await supabase.from('artworks').insert({
+            id: artwork.id,
+            title: artwork.title,
+            image_url: artwork.imageUrl,
+            dimensions: artwork.dimensions,
+            technique: artwork.technique,
+            year: artwork.year,
+            description: artwork.description,
+            is_visible: artwork.isVisible,
+            show_in_slider: artwork.showInSlider,
+            order: artwork.order
+          });
+        } catch (e) {
+          console.warn('Erreur sauvegarde Supabase artwork:', e);
+        }
+      }
+      
       res.status(201).json(artwork);
     } catch (error) {
       res.status(400).json({ error: "Invalid artwork data" });
