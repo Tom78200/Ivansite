@@ -215,9 +215,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all exhibitions
   app.get("/api/exhibitions", async (req, res) => {
     try {
-      let exhibitions;
+      // TOUJOURS lire depuis le storage local d'abord pour que ça marche immédiatement
+      const exhibitions = await storage.getExhibitions();
+      console.log(`[EXHIBITIONS] Local exhibitions count: ${exhibitions.length}`);
       
-      // Essayer de lire depuis Supabase d'abord
+      // Essayer de lire depuis Supabase en parallèle (sans bloquer)
       if (supabase) {
         try {
           const { data, error } = await supabase
@@ -225,8 +227,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .select('*')
             .order('order', { ascending: true });
           
-          if (!error && data) {
-            exhibitions = data.map(exhibition => ({
+          console.log(`[EXHIBITIONS] Supabase exhibitions count: ${data?.length || 0}`);
+          
+          if (!error && data && data.length > 0) {
+            // Si Supabase a des données, les utiliser
+            const supabaseExhibitions = data.map(exhibition => ({
               id: exhibition.id,
               title: exhibition.title,
               location: exhibition.location,
@@ -237,20 +242,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
               videoUrl: exhibition.video_url,
               order: exhibition.order
             }));
+            console.log(`[EXHIBITIONS] Returning Supabase exhibitions: ${supabaseExhibitions.length}`);
+            res.setHeader("Cache-Control", "no-store");
+            return res.json(supabaseExhibitions);
           }
         } catch (e) {
-          console.warn('Erreur lecture Supabase exhibitions:', e);
+          console.warn('Erreur lecture Supabase exhibitions (fallback local):', e);
         }
       }
       
-      // Fallback vers le storage local si Supabase échoue
-      if (!exhibitions) {
-        exhibitions = await storage.getExhibitions();
-      }
-      
+      console.log(`[EXHIBITIONS] Returning local exhibitions: ${exhibitions.length}`);
       res.setHeader("Cache-Control", "no-store");
       res.json(exhibitions);
     } catch (error) {
+      console.error('[EXHIBITIONS] Error:', error);
       res.status(500).json({ error: "Failed to fetch exhibitions" });
     }
   });
