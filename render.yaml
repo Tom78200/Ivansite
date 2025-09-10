@@ -6,7 +6,6 @@ services:
     plan: free
     buildCommand: npm run build && npm run build:client
     startCommand: npm start
-    nodeVersion: 20
     healthCheckPath: /
     autoDeploy: true
     envVars:
