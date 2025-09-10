@@ -43,6 +43,7 @@ if (app.get("env") === "development") {
           "'self'",
           "data:",
           "https://*.supabase.co",
+          "https://images.pexels.com",
           "https://www.googleapis.com",
           "https://www.galerie-breheret.com",
           "https://i-de.unimedias.fr"
