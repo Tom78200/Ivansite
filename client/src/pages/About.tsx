@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Instagram, Facebook, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Helmet } from "react-helmet-async";
 
@@ -15,38 +15,34 @@ interface StepPhotos {
   [key: number]: Photo[];
 }
 
-const artworks = [
-  {
-    url: "https://www.galerie-breheret.com/datas/img/IVAN_GAUTHIER_JUSTE_EN_BLEU_3_61X48_CM_GOUACHE_POLYCHROMOS_ET_ACRYLIQUE_SUR_PAPIER.jpg",
-    title: "Juste en Bleu 3"
-  },
-  {
-    url: "https://www.galerie-breheret.com/datas/img/IVAN_GAUTHIER_LA_DAME_DU_CIRQUE_POSCA_ET_ACRYLIQUE_SUR_TOILE.jpg",
-    title: "La Dame du Cirque"
-  },
-  {
-    url: "https://www.galerie-breheret.com/datas/img/IVAN_GAUTHIER_UNE_TACHE_SUR_LE_VISAGE_GOUACHE_ET_ACRYLIQUE_SUR_TOILE.jpg",
-    title: "Une Tache sur le Visage"
-  },
-  {
-    url: "https://www.galerie-breheret.com/datas/img/IVAN_GAUTHIER_UN_AMOUR_IMPOSSIBLE_61X48CM_AQUARELLE.jpg",
-    title: "Un Amour Impossible"
-  },
-  {
-    url: "https://www.galerie-breheret.com/datas/img/IVAN_GAUTHIER_UN_AUREVOIR_61X48_CM_AQUARELLE_ET_ENCRE_DE_CHINE_SUR_PAPIER_.jpg",
-    title: "Un Au Revoir"
-  },
-  {
-    url: "https://www.galerie-breheret.com/datas/img/IVAN_GAUTHIER_PETIT_GARCON_AQUARELLE_ENCRE_DE_CHINE_SUR_PAPIER_.jpg",
-    title: "Petit Garçon"
+// Tirage aléatoire d'œuvres depuis l'API publique
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
-];
+  return a;
+}
 
 export default function About() {
   const [isRevealed, setIsRevealed] = useState(false);
   const [step, setStep] = useState(0);
   const [showFullBio, setShowFullBio] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [orbitArtworks, setOrbitArtworks] = useState<{ url: string; title: string }[]>([]);
+
+  useEffect(() => {
+    // Charger des œuvres publiques et en sélectionner aléatoirement 6 pour l'orbite
+    fetch('/api/artworks')
+      .then(r => r.ok ? r.json() : [])
+      .then((list: any[]) => {
+        const pool = (list || []).map(a => ({ url: a.imageUrl as string, title: a.title as string })).filter(a => !!a.url);
+        const picked = shuffleArray(pool).slice(0, 6);
+        if (picked.length > 0) setOrbitArtworks(picked);
+      })
+      .catch(() => {});
+  }, []);
 
   const socialLinks = [
     { icon: Instagram, href: "https://instagram.com", label: "Instagram", color: "hover:text-pink-400" },
@@ -147,15 +143,60 @@ export default function About() {
   return (
     <>
       <Helmet>
-        <title>À propos - Ivan Gauthier</title>
-        <meta name="description" content="Découvrez le parcours, la biographie et l'univers artistique d'Ivan Gauthier, artiste contemporain." />
+        <title>À propos — Ivan Gauthier, Artiste Peintre Contemporain</title>
+        <meta name="description" content="Biographie d'Ivan Gauthier, artiste peintre contemporain. Parcours, esthétique, expositions et univers artistique." />
+        <link rel="canonical" href="https://www.ivangauthier.com/about" />
+        <meta name="keywords" content="Ivan Gauthier, biographie, artiste peintre, parcours, expositions, art, peinture contemporaine, expressionniste" />
+        <meta property="og:title" content="À propos — Ivan Gauthier, Artiste Peintre Contemporain" />
+        <meta property="og:description" content="Découvrez le parcours d'Ivan Gauthier, artiste peintre contemporain. Biographie, esthétique et univers artistique." />
+        <meta property="og:type" content="profile" />
+        <meta property="og:url" content="https://www.ivangauthier.com/about" />
+        <meta property="og:image" content="https://www.ivangauthier.com/generated-icon.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="À propos — Ivan Gauthier" />
+        <meta name="twitter:description" content="Biographie d'Ivan Gauthier, artiste peintre contemporain." />
+        <meta name="twitter:image" content="https://www.ivangauthier.com/generated-icon.png" />
+        <script type="application/ld+json">{`
+          {
+            "@context": "https://schema.org",
+            "@type": "ProfilePage",
+            "name": "À propos d'Ivan Gauthier",
+            "description": "Biographie d'Ivan Gauthier, artiste peintre contemporain. Parcours, esthétique, expositions et univers artistique.",
+            "url": "https://www.ivangauthier.com/about",
+            "mainEntity": {
+              "@type": "Person",
+              "name": "Ivan Gauthier",
+              "jobTitle": "Artiste Peintre Contemporain",
+              "birthDate": "2000-03-01",
+              "birthPlace": "Beregovo, Ukraine",
+              "nationality": "Français"
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Accueil",
+                  "item": "https://www.ivangauthier.com/"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "À propos",
+                  "item": "https://www.ivangauthier.com/about"
+                }
+              ]
+            }
+          }
+        `}</script>
       </Helmet>
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-black pt-16 md:pt-24">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="relative min-h-[80vh] flex items-center justify-center">
             {/* Animation circulaire des œuvres */}
-            {!isRevealed && artworks.map((artwork, index) => {
-              const angle = (index * 360) / artworks.length;
+            {!isRevealed && orbitArtworks.length > 0 && orbitArtworks.map((artwork, index) => {
+              const angle = (index * 360) / Math.max(orbitArtworks.length, 1);
               const radius = 300;
               const x = Math.cos((angle * Math.PI) / 180) * radius;
               const y = Math.sin((angle * Math.PI) / 180) * radius;
@@ -182,9 +223,11 @@ export default function About() {
                 >
                   <img
                     src={artwork.url}
-                    alt={artwork.title}
+                    alt={`${artwork.title} - Œuvre d'Ivan Gauthier, artiste peintre contemporain`}
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    width="128"
+                    height="128"
                   />
                 </motion.div>
               );
@@ -242,9 +285,11 @@ export default function About() {
                       <div className="aspect-[3/4] rounded-xl overflow-hidden border border-white/10 shadow-2xl">
                         <img
                           src="https://www.casting.fr/assets/cache/book_picture_detail/picture/1/1/5/9a6256f7ae4916451292576b954b22affad72d7b.jpg?tms=1680857202"
-                          alt="Portrait d'Ivan Gauthier"
+                          alt="Portrait d'Ivan Gauthier, artiste peintre contemporain"
                           className="w-full h-full object-cover"
-                          loading="lazy"
+                          loading="eager"
+                          width="600"
+                          height="800"
                         />
                       </div>
                       
@@ -314,22 +359,7 @@ export default function About() {
                                     {steps[step].subtitle}
                                   </h3>
                                 )}
-                                {/* Bouton 'Voir les œuvres phares' juste sous le titre et le sous-titre */}
-                                <div className="flex justify-center w-full mb-6">
-                                  <a
-                                    href="/galerie/phares"
-                                    className="relative text-lg md:text-xl font-semibold text-white/90 hover:text-blue-400 transition-colors duration-200 underline-offset-8 decoration-2 flex items-center gap-2 bg-black/30 px-6 py-3 rounded-lg shadow-lg"
-                                    style={{textDecoration: 'none'}}
-                                  >
-                                    <span className="animate-wiggle">Voir les œuvres phares</span>
-                                    <span className="inline-block animate-bounce-slow opacity-70">
-                                      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <rect x="6" y="2" width="10" height="18" rx="5" fill="none" stroke="#e5e7eb" strokeWidth="2"/>
-                                        <circle cx="11" cy="7" r="1.2" fill="#e5e7eb"/>
-                                      </svg>
-                                    </span>
-                                  </a>
-                                </div>
+                                {/* Lien œuvres phares retiré */}
                                 <p className="text-lg text-white/70 leading-relaxed">
                                   {steps[step]?.text}
                                 </p>
@@ -409,9 +439,11 @@ export default function About() {
                                 <div className="w-full h-full rounded-lg overflow-hidden border border-white/10 shadow-2xl">
                                   <img
                                     src={photo.url}
-                                    alt={photo.caption || `Ambiance ${index + 1}`}
+                                    alt={photo.caption ? `${photo.caption} - Ivan Gauthier, artiste peintre contemporain` : `Ambiance ${index + 1} - Ivan Gauthier, artiste peintre contemporain`}
                                     className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                                     loading="lazy"
+                                    width="400"
+                                    height="600"
                                   />
                                   {photo.caption && (
                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -422,22 +454,7 @@ export default function About() {
                               </motion.div>
                             ))}
                           </motion.div>
-                          {/* Bouton 'Voir les œuvres phares' sous le texte, visible partout */}
-                          <div className="flex justify-center w-full mt-8">
-                            <a
-                              href="/galerie/phares"
-                              className="relative text-lg md:text-xl font-semibold text-white/90 hover:text-blue-400 transition-colors duration-200 underline-offset-8 decoration-2 flex items-center gap-2 bg-black/30 px-6 py-3 rounded-lg shadow-lg"
-                              style={{textDecoration: 'none'}}
-                            >
-                              <span className="animate-wiggle">Voir les œuvres phares</span>
-                              <span className="inline-block animate-bounce-slow opacity-70">
-                                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <rect x="6" y="2" width="10" height="18" rx="5" fill="none" stroke="#e5e7eb" strokeWidth="2"/>
-                                  <circle cx="11" cy="7" r="1.2" fill="#e5e7eb"/>
-                                </svg>
-                              </span>
-                            </a>
-                          </div>
+                          {/* Lien œuvres phares retiré */}
                         </AnimatePresence>
                       </div>
                     </div>

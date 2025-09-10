@@ -38,13 +38,22 @@ export default function OptimizedImage({
 
         // Start loading the actual image
         const img = new Image();
+        img.loading = priority ? 'eager' : 'lazy';
+        img.decoding = 'async' as any;
         img.src = src;
-        await img.decode();
+        try {
+          await img.decode();
+        } catch (_e) {
+          // Certains hôtes externes ou anciens navigateurs peuvent échouer sur decode();
+          // on continue quand même avec la source fournie.
+        }
         setImgSrc(src);
         setLoaded(true);
         onLoad?.();
       } catch (e) {
+        // En cas d'erreur, on tente quand même d'afficher l'URL brute
         setError(true);
+        setImgSrc(src);
         console.error('Error loading image:', e);
       }
     };
@@ -57,6 +66,7 @@ export default function OptimizedImage({
       <img
         src={imgSrc}
         alt={alt}
+        referrerPolicy="no-referrer"
         className={`
           w-full h-full object-cover transition-opacity duration-300
           ${loaded ? 'opacity-100' : 'opacity-60'}

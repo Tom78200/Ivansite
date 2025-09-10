@@ -51,9 +51,9 @@ export default function Contact() {
   };
 
   const contactInfo = [
-    { icon: Mail, text: "contact@ivan-gauthier.com", label: "Email" },
+    { icon: Mail, text: "ivangauthier009@gmail.com", label: "Email" },
     { icon: MapPin, text: "Paris, France", label: "Localisation" },
-    { icon: Phone, text: "+33 (0)1 23 45 67 89", label: "Téléphone" },
+    { icon: Phone, text: "06 77 36 35 02", label: "Téléphone" },
   ];
 
   if (isSubmitted) {
@@ -87,8 +87,57 @@ export default function Contact() {
   return (
     <>
       <Helmet>
-        <title>Contact - Ivan Gauthier</title>
-        <meta name="description" content="Contactez Ivan Gauthier pour toute demande d'information, d'exposition ou de collaboration artistique." />
+        <title>Contact — Ivan Gauthier, Artiste Peintre</title>
+        <meta name="description" content="Contactez Ivan Gauthier, artiste peintre contemporain. Demande d'informations, expositions, achats d'œuvres, collaborations." />
+        <link rel="canonical" href="https://www.ivangauthier.com/contact" />
+        <meta name="keywords" content="contact Ivan Gauthier, artiste peintre, expositions, achat d'œuvres, collaboration, Paris" />
+        <meta property="og:title" content="Contact — Ivan Gauthier, Artiste Peintre" />
+        <meta property="og:description" content="Contactez Ivan Gauthier pour vos projets artistiques, expositions et collaborations." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.ivangauthier.com/contact" />
+        <meta property="og:image" content="https://www.ivangauthier.com/generated-icon.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Contact — Ivan Gauthier" />
+        <meta name="twitter:description" content="Contactez Ivan Gauthier, artiste peintre contemporain." />
+        <meta name="twitter:image" content="https://www.ivangauthier.com/generated-icon.png" />
+        <script type="application/ld+json">{`
+          {
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            "name": "Contact Ivan Gauthier",
+            "description": "Contactez Ivan Gauthier, artiste peintre contemporain. Demande d'informations, expositions, achats d'œuvres, collaborations.",
+            "url": "https://www.ivangauthier.com/contact",
+            "mainEntity": {
+              "@type": "Person",
+              "name": "Ivan Gauthier",
+              "jobTitle": "Artiste Peintre Contemporain",
+              "email": "ivangauthier009@gmail.com",
+              "telephone": "0677363502",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Paris",
+                "addressCountry": "FR"
+              }
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Accueil",
+                  "item": "https://www.ivangauthier.com/"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Contact",
+                  "item": "https://www.ivangauthier.com/contact"
+                }
+              ]
+            }
+          }
+        `}</script>
       </Helmet>
       <section className="min-h-screen py-24 px-8">
         <div className="max-w-6xl mx-auto">

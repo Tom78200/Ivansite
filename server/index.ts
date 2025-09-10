@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import dotenv from "dotenv";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
@@ -9,44 +10,56 @@ import helmet from "helmet";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+dotenv.config();
 const isProd = process.env.NODE_ENV === "production";
 const imagesPath = isProd
   ? path.join(__dirname, "public/images")
   : path.join(__dirname, "../public/images");
 
 const app = express();
+// Si derrière un proxy (ex: Vercel/Render/Nginx), nécessaire pour cookies secure
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(session({
-  secret: "Guthier2024!_SESSION_SECRET_@2024", // à changer pour production
+  secret: process.env.SESSION_SECRET || "change-me-in-prod",
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: false, // mettre true si HTTPS
+    secure: isProd, // true en prod (HTTPS)
+    sameSite: "lax",
     maxAge: 1000 * 60 * 60 * 2 // 2h
   }
 }));
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://www.youtube.com", "https://replit.com"],
-      imgSrc: [
-        "'self'",
-        "data:",
-        "https://www.googleapis.com",
-        "https://www.galerie-breheret.com",
-        "https://i-de.unimedias.fr"
-      ],
-      frameSrc: ["'self'", "https://www.youtube.com"],
-      connectSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      objectSrc: ["'none'"],
-      upgradeInsecureRequests: [],
+
+// Sécurité: CSP assouplie en développement pour permettre Vite/HMR
+if (app.get("env") === "development") {
+  app.use(helmet({ contentSecurityPolicy: false }));
+} else {
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://www.youtube.com", "https://replit.com"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https://www.googleapis.com",
+          "https://www.galerie-breheret.com",
+          "https://i-de.unimedias.fr"
+        ],
+        frameSrc: ["'self'", "https://www.youtube.com"],
+        connectSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      }
     }
-  }
-}));
+  }));
+  // HSTS fort en production
+  app.use(helmet.hsts({ maxAge: 63072000, includeSubDomains: true, preload: true }));
+}
 
 // Servir les images statiques
 app.use("/images", express.static(imagesPath));
@@ -54,12 +67,45 @@ app.use("/images", express.static(imagesPath));
 // Cache images et assets statiques
 app.use("/images", (req, res, next) => {
   res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  res.setHeader("Vary", "Accept-Encoding");
   next();
 });
 app.use("/assets", (req, res, next) => {
   res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  res.setHeader("Vary", "Accept-Encoding");
   next();
 });
+
+// Headers de performance pour toutes les réponses
+app.use((req, res, next) => {
+  // Compression
+  res.setHeader("Vary", "Accept-Encoding");
+  
+  // Preload hints pour les ressources critiques
+  if (req.path === "/") {
+    res.setHeader("Link", '</generated-icon.png>; rel=preload; as=image, </assets/index.css>; rel=preload; as=style, </assets/index.js>; rel=preload; as=script');
+  }
+  
+  // Headers de sécurité supplémentaires
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  
+  next();
+});
+
+// Redirection HTTPS en production
+if (isProd) {
+  app.use((req, res, next) => {
+    const xfProto = req.headers["x-forwarded-proto"];
+    const isSecure = (req as any).secure || xfProto === "https";
+    if (!isSecure) {
+      const host = req.headers.host;
+      return res.redirect(301, `https://${host}${req.originalUrl}`);
+    }
+    next();
+  });
+}
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -92,7 +138,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await registerRoutes(app);
+  const httpServer = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -102,13 +148,13 @@ app.use((req, res, next) => {
   });
 
   if (app.get("env") === "development") {
-    // setupVite(app, undefined); // désactivé pour éviter les erreurs de signature
+    await setupVite(app, httpServer);
   } else {
     serveStatic(app);
   }
 
   const port = process.env.PORT ? Number(process.env.PORT) : 5000;
-  app.listen(port, "0.0.0.0", () => {
+  httpServer.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
 })();

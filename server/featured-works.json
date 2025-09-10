@@ -1,10 +1,18 @@
 [
   {
-    "id": 1751928435189,
-    "imageUrl": "/images/image-1751928435184-155684044.png",
-    "title": "dfsdfsd",
-    "description": "fsdfsdfsd",
-    "year": "fsdfsdf",
-    "technique": "sdfsdfsdfsd"
+    "id": 1757343476759,
+    "imageUrl": "/images/image-1757343475819-284542462.png",
+    "title": "fdsfdsfds",
+    "description": "fsdfdsfds",
+    "year": "fdsfsdfds",
+    "technique": "fdsfds"
+  },
+  {
+    "id": 1757427010564,
+    "imageUrl": "https://fzyxdcdzhppdxhoiqatz.supabase.co/storage/v1/object/public/Images/images/1757427008857-841676678.png",
+    "title": "sfdsfdsfs",
+    "description": "fdsfdsf",
+    "year": "sfdsfs",
+    "technique": "fsfsdfsdfdsfds"
   }
 ]

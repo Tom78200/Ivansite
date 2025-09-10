@@ -1,44 +1,13 @@
 [
   {
-    "title": "Test ivan",
-    "location": "Rome",
-    "year": "2004",
-    "imageUrl": "/images/image-1751910842100-864687956.jpg",
-    "description": "TEST",
-    "galleryImages": [
-      {
-        "url": "/images/image-1751910850749-857116305.webp",
-        "caption": ""
-      },
-      {
-        "url": "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nrDLicHt4DcqItPB3y_u77Ip0wKJUoU1w0uluJ6vSRAXx3lD9L7N1MeTgqD3DqPPI3b9plrkUGINtM0HqkhBpZXLEvm3SBaLiqY64ZaOOUb5Vc6Y1uhGKz4lFBXuA_elaLMw50=w540-h312-n-k-no",
-        "caption": ""
-      },
-      {
-        "url": "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nrDLicHt4DcqItPB3y_u77Ip0wKJUoU1w0uluJ6vSRAXx3lD9L7N1MeTgqD3DqPPI3b9plrkUGINtM0HqkhBpZXLEvm3SBaLiqY64ZaOOUb5Vc6Y1uhGKz4lFBXuA_elaLMw50=w540-h312-n-k-no",
-        "caption": ""
-      },
-      {
-        "url": "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nrDLicHt4DcqItPB3y_u77Ip0wKJUoU1w0uluJ6vSRAXx3lD9L7N1MeTgqD3DqPPI3b9plrkUGINtM0HqkhBpZXLEvm3SBaLiqY64ZaOOUb5Vc6Y1uhGKz4lFBXuA_elaLMw50=w540-h312-n-k-no",
-        "caption": ""
-      }
-    ],
-    "id": 2,
-    "videoUrl": null
-  },
-  {
     "title": "dfdfd",
     "location": "fdfdfdfdf",
     "year": "dfdfdfd",
     "imageUrl": "https://i-de.unimedias.fr/2023/12/07/detmirmandedrome0-6571e28854c78.jpg?auto=format,compress&cs=tinysrgb&w=1200",
     "description": "fdfd",
-    "galleryImages": [
-      {
-        "url": "https://i-de.unimedias.fr/2023/12/07/detmirmandedrome0-6571e28854c78.jpg?auto=format,compress&cs=tinysrgb&w=1200",
-        "caption": "dfdfdfd"
-      }
-    ],
+    "galleryImages": [],
     "id": 3,
-    "videoUrl": null
+    "videoUrl": null,
+    "order": 1
   }
 ]

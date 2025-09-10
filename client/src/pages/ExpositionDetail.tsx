@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useExhibitions } from "@/hooks/use-exhibitions";
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function ExpositionDetail() {
   const { data: exhibitions } = useExhibitions();
@@ -101,37 +101,92 @@ export default function ExpositionDetail() {
       {/* Galerie d'images */}
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {(exhibition.galleryImages || []).length === 0 ? (
-              <div className="text-white/60 col-span-full text-center">Aucune image pour cette exposition.</div>
-            ) : (
-              ((exhibition.galleryImages ?? []) as { url: string; caption: string }[]).map((image: { url: string; caption: string }, index: number) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1 }}
-                  className="aspect-[4/3] rounded-lg overflow-hidden group cursor-pointer relative"
-                >
-                  <img
-                    src={image.url}
-                    alt={image.caption}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <p className="text-white font-medium text-lg">{image.caption}</p>
-                  </div>
-                </motion.div>
-              ))
-            )}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
+            <ExpositionMasonry images={(exhibition.galleryImages ?? []) as { url: string; caption: string }[]} />
           </motion.div>
         </div>
       </section>
     </div>
   );
 } 
+
+function ExpositionMasonry({ images }: { images: { url: string; caption: string }[] }) {
+  const [columns, setColumns] = useState(3);
+  const [ratios, setRatios] = useState<number[]>([]);
+
+  useEffect(() => {
+    const compute = () => {
+      const w = window.innerWidth;
+      if (w < 768) setColumns(1);
+      else if (w < 1280) setColumns(2);
+      else setColumns(3);
+    };
+    compute();
+    window.addEventListener("resize", compute);
+    return () => window.removeEventListener("resize", compute);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const r: number[] = [];
+      for (const im of images) {
+        const ratio = await new Promise<number>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 1);
+          img.onerror = () => resolve(1);
+          img.src = im.url;
+        });
+        r.push(ratio || 1);
+      }
+      if (!cancelled) setRatios(r);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [images]);
+
+  const cols: { url: string; caption: string }[][] = Array.from({ length: columns }, () => []);
+  if (ratios.length === images.length) {
+    const heights = Array.from({ length: columns }, () => 0);
+    const gapUnit = 1;
+    images.forEach((im, idx) => {
+      const ratio = ratios[idx] || 1;
+      const estimatedHeight = 1 / ratio;
+      let minIndex = 0;
+      for (let i = 1; i < columns; i++) if (heights[i] < heights[minIndex]) minIndex = i;
+      cols[minIndex].push(im);
+      heights[minIndex] += estimatedHeight + gapUnit;
+    });
+  } else {
+    images.forEach((im, idx) => cols[idx % columns].push(im));
+  }
+
+  if (images.length === 0) return <div className="text-white/60 text-center">Aucune image pour cette exposition.</div>;
+
+  return (
+    <div className="grid gap-8" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0,1fr))` }}>
+      {cols.map((col, ci) => (
+        <div key={ci} className="flex flex-col gap-8">
+          {col.map((image, index) => (
+            <motion.div
+              key={`c${ci}-img-${index}`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] } }}
+              viewport={{ once: true, margin: "-10%" }}
+              className="rounded-lg overflow-hidden group cursor-pointer relative"
+            >
+              <img
+                src={image.url}
+                alt={image.caption}
+                className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <p className="text-white font-medium text-lg">{image.caption}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}

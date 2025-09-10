@@ -67,8 +67,50 @@ export default function Gallery() {
   return (
     <>
       <Helmet>
-        <title>Galerie - Ivan Gauthier</title>
-        <meta name="description" content="Découvrez la galerie d'œuvres contemporaines d'Ivan Gauthier : peintures, expositions, œuvres phares et univers artistique unique." />
+        <title>Galerie d'œuvres — Ivan Gauthier, Artiste Peintre Contemporain</title>
+        <meta name="description" content="Galerie d'œuvres d'Ivan Gauthier, artiste peintre contemporain. Peinture figurative et expressionniste, expositions, techniques, années." />
+        <link rel="canonical" href="https://www.ivangauthier.com/" />
+        <meta name="keywords" content="Ivan Gauthier, galerie, œuvres, peintre, peinture contemporaine, art contemporain, Paris, exposition, artiste" />
+        <meta property="og:title" content="Galerie d'œuvres — Ivan Gauthier, Artiste Peintre Contemporain" />
+        <meta property="og:description" content="Découvrez la galerie d'œuvres d'Ivan Gauthier, artiste peintre contemporain. Peinture figurative et expressionniste." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.ivangauthier.com/" />
+        <meta property="og:image" content="https://www.ivangauthier.com/generated-icon.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Galerie d'œuvres — Ivan Gauthier" />
+        <meta name="twitter:description" content="Galerie d'œuvres d'Ivan Gauthier, artiste peintre contemporain." />
+        <meta name="twitter:image" content="https://www.ivangauthier.com/generated-icon.png" />
+        <script type="application/ld+json">{`
+          {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "Galerie d'œuvres d'Ivan Gauthier",
+            "description": "Galerie d'œuvres d'Ivan Gauthier, artiste peintre contemporain. Peinture figurative et expressionniste.",
+            "url": "https://www.ivangauthier.com/",
+            "mainEntity": {
+              "@type": "Person",
+              "name": "Ivan Gauthier",
+              "jobTitle": "Artiste Peintre Contemporain"
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Accueil",
+                  "item": "https://www.ivangauthier.com/"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Galerie",
+                  "item": "https://www.ivangauthier.com/"
+                }
+              ]
+            }
+          }
+        `}</script>
       </Helmet>
       <AnimatePresence>
         <section className="relative w-full h-[90vh] overflow-hidden">
@@ -89,9 +131,11 @@ export default function Gallery() {
                 >
                   <img 
                     src={sliderArtworks[currentSlideIndex]?.imageUrl} 
-                    alt={sliderArtworks[currentSlideIndex]?.title}
+                    alt={`${sliderArtworks[currentSlideIndex]?.title} - Œuvre d'Ivan Gauthier, artiste peintre contemporain`}
                     className="w-full h-full object-cover"
-                    loading="lazy"
+                    loading="eager"
+                    width="1920"
+                    height="1080"
                   />
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black" />
                 </motion.div>
@@ -136,57 +180,14 @@ export default function Gallery() {
             <h1 className="text-6xl md:text-8xl font-playfair text-white mb-4 tracking-wider">IVAN GAUTHIER</h1>
             <p className="text-xl text-white opacity-80 tracking-[0.3em] uppercase">Artiste Contemporain</p>
             <div className="flex justify-center w-full mt-8">
-              <a
-                href="/galerie/phares"
-                className="relative text-lg md:text-xl font-semibold text-white/90 hover:text-blue-400 transition-colors duration-200 underline-offset-8 decoration-2 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-                style={{textDecoration: 'none'}}
-                aria-label="Voir les œuvres phares"
-              >
-                <span className="animate-wiggle">Voir les œuvres phares</span>
-                <span className="inline-block animate-bounce-slow opacity-70">
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="6" y="2" width="10" height="18" rx="5" fill="none" stroke="#e5e7eb" strokeWidth="2"/>
-                    <circle cx="11" cy="7" r="1.2" fill="#e5e7eb"/>
-                  </svg>
-                </span>
-              </a>
+              {/* Lien œuvres phares supprimé */}
             </div>
           </motion.div>
         </section>
 
         <section className="bg-black py-20">
-          <div className="w-full max-w-[2000px] mx-auto">
-            <div className="masonry-grid">
-              {artworks.map((artwork, index) => (
-                <motion.div
-                  key={`artwork-${index}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ 
-                    opacity: 1,
-                    y: 0,
-                    transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] }
-                  }}
-                  viewport={{ once: true, margin: "-10%" }}
-                  className="artwork-card group cursor-pointer"
-                  onClick={() => openLightbox(artwork)}
-                >
-                  <div className="relative overflow-hidden">
-                    <img 
-                      src={artwork.imageUrl}
-                      alt={artwork.title}
-                      loading="lazy"
-                      className="w-full h-auto object-cover"
-                    />
-                    <div 
-                      className={`absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 ease-out${isLightboxOpen ? ' hide-on-mobile' : ''}`}
-                    >
-                      <h3 className="text-xl font-playfair mb-1">{artwork.title}</h3>
-                      <p className="text-sm opacity-90">{artwork.technique} • {artwork.year}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+          <div className="w-full max-w-[2000px] mx-auto px-6">
+            <MasonryColumns artworks={artworks} isLightboxOpen={isLightboxOpen} onOpen={openLightbox} />
           </div>
         </section>
 
@@ -197,5 +198,106 @@ export default function Gallery() {
         />
       </AnimatePresence>
     </>
+  );
+}
+
+type MasonryProps = {
+  artworks: Artwork[];
+  onOpen: (artwork: Artwork) => void;
+  isLightboxOpen: boolean;
+};
+
+function MasonryColumns({ artworks, onOpen, isLightboxOpen }: MasonryProps) {
+  const [columns, setColumns] = useState<number>(3);
+  const [ratios, setRatios] = useState<number[]>([]);
+
+  useEffect(() => {
+    const compute = () => {
+      const w = window.innerWidth;
+      if (w < 768) setColumns(1);
+      else if (w < 1280) setColumns(2);
+      else setColumns(3);
+    };
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const r: number[] = [];
+      for (const a of artworks) {
+        const ratio = await new Promise<number>((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            if (!img.naturalWidth || !img.naturalHeight) resolve(1);
+            else resolve(img.naturalWidth / img.naturalHeight);
+          };
+          img.onerror = () => resolve(1);
+          img.src = a.imageUrl;
+        });
+        r.push(ratio || 1);
+      }
+      if (!cancelled) setRatios(r);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [artworks]);
+
+  const cols: Artwork[][] = Array.from({ length: columns }, () => []);
+  if (ratios.length === artworks.length) {
+    const heights: number[] = Array.from({ length: columns }, () => 0);
+    const gapUnit = 1; // proxy for vertical gap
+    artworks.forEach((artwork, idx) => {
+      const ratio = ratios[idx] || 1; // width/height
+      // Proxy for rendered height at fixed column width: 1/ratio
+      const estimatedHeight = 1 / (ratio || 1);
+      let minIndex = 0;
+      for (let i = 1; i < columns; i++) {
+        if (heights[i] < heights[minIndex]) minIndex = i;
+      }
+      cols[minIndex].push(artwork);
+      heights[minIndex] += estimatedHeight + gapUnit;
+    });
+  } else {
+    // Fallback round-robin while ratios load
+    artworks.forEach((artwork, idx) => {
+      cols[idx % columns].push(artwork);
+    });
+  }
+
+  return (
+    <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0,1fr))` }}>
+      {cols.map((col, ci) => (
+        <div key={ci} className="flex flex-col gap-6">
+          {col.map((artwork, index) => (
+            <motion.div
+              key={`c${ci}-art-${index}`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] } }}
+              viewport={{ once: true, margin: "-10%" }}
+              className="artwork-card group cursor-pointer"
+              onClick={() => onOpen(artwork)}
+            >
+              <div className="relative overflow-hidden">
+                <img
+                  src={artwork.imageUrl}
+                  alt={`${artwork.title} - ${artwork.technique} ${artwork.year} - Œuvre d'Ivan Gauthier, artiste peintre contemporain`}
+                  loading="lazy"
+                  className="w-full h-auto object-cover"
+                  width="800"
+                  height="600"
+                />
+                <div className={`absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 ease-out${isLightboxOpen ? ' hide-on-mobile' : ''}`}>
+                  <h3 className="text-xl font-playfair mb-1">{artwork.title}</h3>
+                  <p className="text-sm opacity-90">{artwork.technique} • {artwork.year}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }

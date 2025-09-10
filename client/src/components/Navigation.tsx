@@ -36,7 +36,7 @@ export default function Navigation() {
         transition={{ duration: 0.3 }}
         className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/30 to-transparent backdrop-blur-sm hidden md:block"
       >
-        <nav className="max-w-7xl mx-auto px-8 py-6">
+        <nav className="max-w-7xl mx-auto px-8 py-8">
           <div className="flex items-center justify-between">
             {/* Left Menu */}
             <div className="flex space-x-8">
@@ -66,7 +66,7 @@ export default function Navigation() {
             <Link href="/">
               <motion.h1
                 whileHover={{ scale: 1.02 }}
-                className="text-white font-playfair text-2xl md:text-3xl tracking-[0.2em] uppercase cursor-pointer"
+                className="text-white font-playfair text-2xl md:text-3xl tracking-[0.2em] uppercase cursor-pointer mt-1"
               >
                 Ivan Gauthier
               </motion.h1>

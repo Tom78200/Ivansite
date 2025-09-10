@@ -27,6 +27,8 @@ const EXHIBITIONS_PATH = path.join(projectRoot, "server", "exhibitions.json");
 const SLOTS_PATH = path.join(projectRoot, "server", "slots.json");
 const FEATURED_PATH = path.join(projectRoot, "server", "featured.json");
 const FEATURED_WORKS_PATH = path.join(projectRoot, "server", "featured-works.json");
+const FEATURED_WORKS_ORDER_PATH = path.join(projectRoot, "server", "featured-works-order.json");
+const HOURS_PATH = path.join(projectRoot, "server", "hours.json");
 
 export interface FeaturedWork {
   id: number;
@@ -103,6 +105,19 @@ function saveFeaturedWorksToFile(works: FeaturedWork[]) {
   fs.writeFileSync(FEATURED_WORKS_PATH, JSON.stringify(works, null, 2), "utf-8");
 }
 
+function loadFeaturedWorksOrderFromFile(): number[] {
+  try {
+    const data = fs.readFileSync(FEATURED_WORKS_ORDER_PATH, "utf-8");
+    return JSON.parse(data);
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveFeaturedWorksOrderToFile(orderIds: number[]) {
+  fs.writeFileSync(FEATURED_WORKS_ORDER_PATH, JSON.stringify(orderIds, null, 2), "utf-8");
+}
+
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -115,6 +130,7 @@ export interface IStorage {
   getExhibitions(): Promise<Exhibition[]>;
   getExhibition(id: number): Promise<Exhibition | undefined>;
   createExhibition(exhibition: InsertExhibition): Promise<Exhibition>;
+  reorderExhibitions(newOrder: {id: number, order: number}[]): Promise<void>;
   
   createContactMessage(message: InsertContactMessage): Promise<ContactMessage>;
 
@@ -136,6 +152,11 @@ export interface IStorage {
   addFeaturedWork(work: FeaturedWork): Promise<void>;
   updateFeaturedWork(id: number, data: Partial<FeaturedWork>): Promise<void>;
   deleteFeaturedWork(id: number): Promise<void>;
+  getFeaturedWorksOrder(): Promise<number[]>;
+  setFeaturedWorksOrder(ids: number[]): Promise<void>;
+
+  getHours(): Promise<string[]>;
+  setHours(hours: string[]): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -150,6 +171,18 @@ export class MemStorage implements IStorage {
   private slots: (number | null)[];
   private featured: number[];
   private featuredWorks: FeaturedWork[] = loadFeaturedWorksFromFile();
+  private featuredWorksOrder: number[] = loadFeaturedWorksOrderFromFile();
+  private hours: string[] = (() => {
+    try {
+      return JSON.parse(fs.readFileSync(HOURS_PATH, "utf-8"));
+    } catch {
+      return [
+        "Lundi - Vendredi : 9h00 - 18h00",
+        "Samedi : Sur rendez-vous",
+        "Dimanche : Fermé"
+      ];
+    }
+  })();
 
   constructor() {
     this.users = new Map();
@@ -184,12 +217,18 @@ export class MemStorage implements IStorage {
 
   private loadExhibitions() {
     const loaded = loadExhibitionsFromFile();
-    loaded.forEach(expo => {
-      this.exhibitions.set(expo.id, expo);
+    let needSave = false;
+    loaded.forEach((expo: any, idx: number) => {
+      if (typeof expo.order !== 'number') {
+        expo.order = idx; // assigner un ordre par défaut si absent
+        needSave = true;
+      }
+      this.exhibitions.set(expo.id, expo as Exhibition);
       if (expo.id >= this.currentExhibitionId) {
         this.currentExhibitionId = expo.id + 1;
       }
     });
+    if (needSave) this.saveExhibitions();
   }
 
   private saveExhibitions() {
@@ -239,7 +278,9 @@ export class MemStorage implements IStorage {
   }
 
   async getExhibitions(): Promise<Exhibition[]> {
-    return Array.from(this.exhibitions.values());
+    const all = Array.from(this.exhibitions.values());
+    const sorted = [...all].sort((a: any, b: any) => ((a?.order ?? Number.MAX_SAFE_INTEGER) - (b?.order ?? Number.MAX_SAFE_INTEGER)) || (a.id - b.id));
+    return sorted as Exhibition[];
   }
 
   async getExhibition(id: number): Promise<Exhibition | undefined> {
@@ -248,12 +289,14 @@ export class MemStorage implements IStorage {
 
   async createExhibition(insertExhibition: InsertExhibition): Promise<Exhibition> {
     const id = this.currentExhibitionId++;
+    const all = Array.from(this.exhibitions.values());
     const exhibition: Exhibition = {
       ...insertExhibition,
       id,
       galleryImages: insertExhibition.galleryImages ?? [],
       videoUrl: insertExhibition.videoUrl ?? null
     };
+    (exhibition as any).order = (all.length);
     this.exhibitions.set(id, exhibition);
     this.saveExhibitions();
     return exhibition;
@@ -306,6 +349,18 @@ export class MemStorage implements IStorage {
     this.saveArtworks();
   }
 
+  async reorderExhibitions(newOrder: {id: number, order: number}[]): Promise<void> {
+    const map = new Map<number, number>();
+    newOrder.forEach(({ id, order }) => map.set(id, order));
+    const all = Array.from(this.exhibitions.values()) as any[];
+    for (const e of all) {
+      if (map.has(e.id)) e.order = map.get(e.id);
+      else if (typeof e.order !== 'number') e.order = Number.MAX_SAFE_INTEGER;
+    }
+    // Ne pas réassigner la Map pour préserver les références; juste sauvegarder
+    this.saveExhibitions();
+  }
+
   async getSlots(): Promise<(number | null)[]> {
     return this.slots;
   }
@@ -325,12 +380,35 @@ export class MemStorage implements IStorage {
   }
 
   async getFeaturedWorks(): Promise<FeaturedWork[]> {
+    // Si un ordre est défini, retourner trié selon l'ordre, puis les éléments restants
+    if (this.featuredWorksOrder && this.featuredWorksOrder.length > 0) {
+      const idToWork = new Map(this.featuredWorks.map((w) => [w.id, w]));
+      const ordered: FeaturedWork[] = [];
+      for (const id of this.featuredWorksOrder) {
+        const w = idToWork.get(id);
+        if (w) {
+          ordered.push(w);
+          idToWork.delete(id);
+        }
+      }
+      // Ajouter les non listés à la fin (sécurité)
+      for (const rest of idToWork.values()) {
+        ordered.push(rest);
+      }
+      return ordered;
+    }
     return this.featuredWorks;
   }
 
   async addFeaturedWork(work: FeaturedWork): Promise<void> {
     this.featuredWorks.push(work);
     saveFeaturedWorksToFile(this.featuredWorks);
+    // Maintenir aussi l'ordre
+    if (!Array.isArray(this.featuredWorksOrder)) this.featuredWorksOrder = [];
+    if (!this.featuredWorksOrder.includes(work.id)) {
+      this.featuredWorksOrder.push(work.id);
+      saveFeaturedWorksOrderToFile(this.featuredWorksOrder);
+    }
   }
 
   async updateFeaturedWork(id: number, data: Partial<FeaturedWork>): Promise<void> {
@@ -344,6 +422,26 @@ export class MemStorage implements IStorage {
   async deleteFeaturedWork(id: number): Promise<void> {
     this.featuredWorks = this.featuredWorks.filter((w: FeaturedWork) => w.id !== id);
     saveFeaturedWorksToFile(this.featuredWorks);
+    this.featuredWorksOrder = this.featuredWorksOrder.filter(x => x !== id);
+    saveFeaturedWorksOrderToFile(this.featuredWorksOrder);
+  }
+
+  async getHours(): Promise<string[]> {
+    return this.hours;
+  }
+
+  async setHours(hours: string[]): Promise<void> {
+    this.hours = hours;
+    fs.writeFileSync(HOURS_PATH, JSON.stringify(hours, null, 2), "utf-8");
+  }
+
+  async getFeaturedWorksOrder(): Promise<number[]> {
+    return this.featuredWorksOrder;
+  }
+
+  async setFeaturedWorksOrder(ids: number[]): Promise<void> {
+    this.featuredWorksOrder = ids;
+    saveFeaturedWorksOrderToFile(ids);
   }
 }
 

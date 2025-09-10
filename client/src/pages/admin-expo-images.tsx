@@ -9,8 +9,7 @@ export default function AdminExpoImages() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [images, setImages] = useState<{ url: string; caption: string }[]>([]);
-  const [addMode, setAddMode] = useState<"url" | "upload">("url");
-  const [addForm, setAddForm] = useState({ url: "", caption: "" });
+  const [addForm, setAddForm] = useState({ caption: "" });
   const [addFile, setAddFile] = useState<File | null>(null);
   const [addError, setAddError] = useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -34,23 +33,25 @@ export default function AdminExpoImages() {
     e.preventDefault();
     setIsAdding(true);
     setAddError("");
-    let url = addForm.url;
-    if (addMode === "upload" && addFile) {
-      const data = new FormData();
-      data.append("image", addFile);
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: data
-      });
-      if (!uploadRes.ok) {
-        const err = await uploadRes.json();
-        setAddError(err.error || "Erreur lors de l'upload de l'image.");
-        setIsAdding(false);
-        return;
-      }
-      const uploadData = await uploadRes.json();
-      url = uploadData.imageUrl;
+    if (!addFile) {
+      setAddError("Veuillez sélectionner une image.");
+      setIsAdding(false);
+      return;
     }
+    const data = new FormData();
+    data.append("image", addFile);
+    const uploadRes = await fetch("/api/upload", {
+      method: "POST",
+      body: data
+    });
+    if (!uploadRes.ok) {
+      const err = await uploadRes.json();
+      setAddError(err.error || "Erreur lors de l'upload de l'image.");
+      setIsAdding(false);
+      return;
+    }
+    const uploadData = await uploadRes.json();
+    const url = uploadData.imageUrl;
     // Ajout dans la galerie
     const newImages = [...images, { url, caption: addForm.caption }];
     const res = await fetch(`/api/exhibitions/${expoId}/gallery`, {
@@ -62,7 +63,7 @@ export default function AdminExpoImages() {
       setAddError("Erreur lors de l'ajout de l'image à la galerie.");
     } else {
       setImages(newImages);
-      setAddForm({ url: "", caption: "" });
+      setAddForm({ caption: "" });
       setAddFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -84,21 +85,13 @@ export default function AdminExpoImages() {
   if (error || !expo) return <div className="min-h-screen flex items-center justify-center text-red-400">{error || "Exposition introuvable"}</div>;
 
   return (
-    <div className="min-h-screen bg-black text-white p-8">
+    <div className="min-h-screen bg-black text-white p-8 pt-24 md:pt-32">
       <div className="max-w-3xl mx-auto">
         <h2 className="text-3xl font-bold mb-4">Gérer les images de « {expo.title} »</h2>
         <button onClick={() => setLocation("/admin/expos")} className="mb-6 text-blue-400 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Retour aux expositions admin">&larr; Retour aux expositions</button>
         <form onSubmit={handleAddImage} className="bg-white/10 rounded-xl p-6 mb-8 border border-white/20 flex flex-col gap-4">
           <h3 className="text-xl font-semibold mb-2">Ajouter une image</h3>
-          <div className="flex gap-4 mb-2">
-            <button type="button" onClick={() => setAddMode("url")} className={`px-3 py-1 rounded ${addMode === "url" ? "bg-white text-black" : "bg-black text-white border border-white/30"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400`} aria-label="Image par URL">Image par URL</button>
-            <button type="button" onClick={() => setAddMode("upload")} className={`px-3 py-1 rounded ${addMode === "upload" ? "bg-white text-black" : "bg-black text-white border border-white/30"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400`} aria-label="Upload local">Upload local</button>
-          </div>
-          {addMode === "url" ? (
-            <input name="url" value={addForm.url} onChange={e => setAddForm(f => ({ ...f, url: e.target.value }))} placeholder="URL de l'image*" className="p-2 rounded bg-white/20 text-white border border-white/30" required />
-          ) : (
-            <input name="imageFile" type="file" accept="image/*" ref={fileInputRef} onChange={e => setAddFile(e.target.files?.[0] || null)} className="p-2 rounded bg-white/20 text-white border border-white/30" required />
-          )}
+          <input name="imageFile" type="file" accept="image/*" ref={fileInputRef} onChange={e => setAddFile(e.target.files?.[0] || null)} className="p-2 rounded bg-white/20 text-white border border-white/30" required />
           <input name="caption" value={addForm.caption} onChange={e => setAddForm(f => ({ ...f, caption: e.target.value }))} placeholder="Légende (facultatif)" className="p-2 rounded bg-white/20 text-white border border-white/30" />
           <button type="submit" className="bg-green-500 hover:bg-green-600 text-white rounded p-2 font-semibold mt-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Ajouter à la galerie" disabled={isAdding}>{isAdding ? "Ajout..." : "Ajouter à la galerie"}</button>
           {addError && <div className="text-red-400 text-center mt-2">{addError}</div>}
