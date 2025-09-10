@@ -361,31 +361,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       console.log(`[DELETE] Tentative suppression artwork ID: ${id}`);
       
-      const existing = await storage.getArtwork(id);
-      if (!existing) {
-        console.log(`[DELETE] Artwork ${id} non trouvé`);
-        return res.status(404).json({ error: "Artwork not found" });
-      }
+      let existing = await storage.getArtwork(id);
+      let foundInSupabase = false;
       
-      console.log(`[DELETE] Artwork trouvé: ${existing.title}`);
-      const deleted = await storage.deleteArtwork(id);
-      if (!deleted) {
-        console.log(`[DELETE] Échec suppression artwork ${id}`);
-        return res.status(404).json({ error: "Artwork not found" });
-      }
-      
-      // Supprimer aussi de Supabase pour la persistance
+      // Vérifier d'abord dans Supabase si l'œuvre existe
       if (supabase) {
         try {
-          await supabase.from('artworks').delete().eq('id', id);
+          const { data, error } = await supabase
+            .from('artworks')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (data && !error) {
+            foundInSupabase = true;
+            console.log(`[DELETE] Artwork ${id} trouvé dans Supabase: ${data.title}`);
+            
+            // Supprimer de Supabase
+            await supabase.from('artworks').delete().eq('id', id);
+            
+            // Supprimer l'image si elle est sur Supabase
+            if (data.image_url && data.image_url.startsWith("http")) {
+              try {
+                await deleteSupabasePublicFile(data.image_url);
+              } catch (e) {
+                console.warn('Erreur suppression image Supabase:', e);
+              }
+            }
+          }
         } catch (e) {
-          console.warn('Erreur suppression Supabase artwork:', e);
+          console.warn('Erreur vérification Supabase:', e);
         }
       }
       
-      if (supabase && existing?.imageUrl && existing.imageUrl.startsWith("http")) {
-        try { await deleteSupabasePublicFile(existing.imageUrl); } catch {}
+      // Supprimer du storage local si trouvé
+      if (existing) {
+        console.log(`[DELETE] Artwork trouvé localement: ${existing.title}`);
+        const deleted = await storage.deleteArtwork(id);
+        if (!deleted) {
+          console.log(`[DELETE] Échec suppression artwork ${id} du storage local`);
+        }
       }
+      
+      // Si ni Supabase ni local, erreur
+      if (!foundInSupabase && !existing) {
+        console.log(`[DELETE] Artwork ${id} non trouvé nulle part`);
+        return res.status(404).json({ error: "Artwork not found" });
+      }
+      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete artwork" });
