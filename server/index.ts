@@ -17,18 +17,15 @@ const imagesPath = isProd
   : path.join(__dirname, "../public/images");
 
 const app = express();
-// Si derrière un proxy (ex: Vercel/Render/Nginx), nécessaire pour cookies secure
-app.set("trust proxy", 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(session({
-  secret: process.env.SESSION_SECRET || "change-me-in-prod",
+  secret: "Guthier2024!_SESSION_SECRET_@2024", // à changer pour production
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: isProd, // true en prod (HTTPS)
-    sameSite: "lax",
+    secure: false, // mettre true si HTTPS
     maxAge: 1000 * 60 * 60 * 2 // 2h
   }
 }));
@@ -57,8 +54,6 @@ if (app.get("env") === "development") {
       }
     }
   }));
-  // HSTS fort en production
-  app.use(helmet.hsts({ maxAge: 63072000, includeSubDomains: true, preload: true }));
 }
 
 // Servir les images statiques
@@ -93,19 +88,6 @@ app.use((req, res, next) => {
   
   next();
 });
-
-// Redirection HTTPS en production
-if (isProd) {
-  app.use((req, res, next) => {
-    const xfProto = req.headers["x-forwarded-proto"];
-    const isSecure = (req as any).secure || xfProto === "https";
-    if (!isSecure) {
-      const host = req.headers.host;
-      return res.redirect(301, `https://${host}${req.originalUrl}`);
-    }
-    next();
-  });
-}
 
 app.use((req, res, next) => {
   const start = Date.now();

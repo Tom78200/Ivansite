@@ -11,7 +11,6 @@ import { fileURLToPath } from 'url';
 import sharp from "sharp";
 import fs from "fs";
 import { createClient } from "@supabase/supabase-js";
-import crypto from "crypto";
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -23,7 +22,6 @@ const supabase = hasSupabase
   ? createClient(process.env.SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE as string)
   : null;
 const featuredTable = (process.env.SUPABASE_FEATURED_TABLE || "featured_works");
-const SESSION_SECRET = process.env.SESSION_SECRET || "change-me-in-prod";
 
 const upload = multer({
   storage: hasSupabase
@@ -58,66 +56,9 @@ async function uploadBufferToSupabase(originalName: string, mimeType: string, bu
 }
 
 // Middleware de protection admin
-function parseCookies(req: Request): Record<string, string> {
-  const header = req.headers["cookie"] || "";
-  const out: Record<string, string> = {};
-  header.split(";").forEach((part) => {
-    const [k, ...rest] = part.trim().split("=");
-    if (!k) return;
-    out[k] = decodeURIComponent(rest.join("="));
-  });
-  return out;
-}
-
-function signToken(payload: Record<string, any>): string {
-  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const sig = crypto.createHmac("sha256", SESSION_SECRET).update(body).digest("base64url");
-  return `${body}.${sig}`;
-}
-
-function verifyToken(token: string): Record<string, any> | null {
-  const [body, sig] = token.split(".");
-  if (!body || !sig) return null;
-  const expected = crypto.createHmac("sha256", SESSION_SECRET).update(body).digest("base64url");
-  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
-  try {
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf-8"));
-    if (payload.exp && Date.now() > payload.exp) return null;
-    return payload;
-  } catch {
-    return null;
-  }
-}
-
 function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if ((req.session as any).isAdmin) return next();
-  const cookies = parseCookies(req);
-  const tok = cookies["admin_auth"];
-  if (tok) {
-    const payload = verifyToken(tok);
-    if (payload && payload.role === "admin") return next();
-  }
   res.status(401).json({ error: "Non authentifié" });
-}
-
-// Rate limit léger en mémoire (IP-based)
-const rlBucket = new Map<string, { count: number; resetAt: number }>();
-function rateLimit(windowMs: number, max: number) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const key = `${req.ip}:${req.path}`;
-    const now = Date.now();
-    const entry = rlBucket.get(key) || { count: 0, resetAt: now + windowMs };
-    if (now > entry.resetAt) {
-      entry.count = 0;
-      entry.resetAt = now + windowMs;
-    }
-    entry.count += 1;
-    rlBucket.set(key, entry);
-    if (entry.count > max) {
-      return res.status(429).json({ error: "Trop de requêtes, réessayez plus tard" });
-    }
-    next();
-  };
 }
 
 function extractSupabasePathFromPublicUrl(publicUrl: string, bucket: string): string | null {
@@ -314,7 +255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload image
-  app.post("/api/upload", rateLimit(5 * 60 * 1000, 120), requireAdmin, upload.single("image"), async (req: Request, res: Response) => {
+  app.post("/api/upload", requireAdmin, upload.single("image"), async (req: Request, res: Response) => {
     const file = req.file as Express.Multer.File;
     if (!file) {
       return res.status(400).json({ error: "Aucun fichier reçu" });
@@ -446,16 +387,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Authentification admin (login)
-  app.post("/api/login", rateLimit(5 * 60 * 1000, 20), (req, res) => {
+  app.post("/api/login", (req, res) => {
     const { password } = req.body;
-    const expected = process.env.ADMIN_PASSWORD || "Guthier2024!";
-    if (password === expected) {
+    if (password === "Guthier2024!") {
       (req.session as any).isAdmin = true;
-      (req.session as any).csrfToken = crypto.randomBytes(24).toString("hex");
-      // Définir aussi un cookie signé stateless pour compatibilité serverless
-      const token = signToken({ role: "admin", exp: Date.now() + 2 * 60 * 60 * 1000 });
-      const secure = (process.env.NODE_ENV === "production");
-      res.setHeader("Set-Cookie", `admin_auth=${token}; Path=/; HttpOnly; SameSite=Lax; ${secure ? "Secure; " : ""}Max-Age=${2*60*60}`);
       return res.json({ success: true });
     }
     res.status(401).json({ error: "Mot de passe incorrect" });
@@ -464,8 +399,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Déconnexion admin (logout)
   app.post("/api/logout", (req, res) => {
     req.session.destroy(() => {
-      // Expirer le cookie stateless aussi
-      res.setHeader("Set-Cookie", `admin_auth=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`);
       res.json({ success: true });
     });
   });

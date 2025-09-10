@@ -1,28 +1,32 @@
-# Dependencies
+# Node
 node_modules/
+npm-debug.log*
+pnpm-lock.yaml
+yarn.lock
 
 # Build outputs
 dist/
-client/.vite/
+.vercel/
+public/images/
 
-# Env and local configs
+# Env
 .env
-.env.*
-*.local
+.env.local
+.env.*.local
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Editor
-.vscode/
-.idea/
+# OS
 .DS_Store
 Thumbs.db
 
-# Misc
-public/images/*
-!public/images/.gitkeep
-.vercel
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+node_modules
+dist
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
