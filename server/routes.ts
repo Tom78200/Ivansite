@@ -333,30 +333,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("[CREATE] Tentative création exposition:", req.body);
       const validatedData = insertExhibitionSchema.parse(req.body);
-      const exhibition = await storage.createExhibition(validatedData);
-      console.log("[CREATE] Exposition créée localement:", exhibition.id);
       
-      // Sauvegarder aussi dans Supabase pour la persistance (sans bloquer)
+      // Créer l'exposition localement d'abord
+      const exhibition = await storage.createExhibition(validatedData);
+      console.log("[CREATE] Exposition créée localement avec ID:", exhibition.id);
+      
+      // Retourner immédiatement pour que ça s'affiche
+      res.status(201).json(exhibition);
+      
+      // Sauvegarder dans Supabase en arrière-plan (sans bloquer)
       if (supabase) {
-        try {
-          const result = await supabase.from('exhibitions').insert({
-            id: exhibition.id,
-            title: exhibition.title,
-            location: exhibition.location,
-            year: exhibition.year,
-            image_url: exhibition.imageUrl,
-            description: exhibition.description,
-            gallery_images: exhibition.galleryImages || [],
-            video_url: exhibition.videoUrl || null,
-            order: exhibition.order
-          });
-          console.log("[CREATE] Exposition sauvegardée dans Supabase:", result);
-        } catch (e) {
-          console.warn('[CREATE] Erreur sauvegarde Supabase exhibition (non bloquant):', e);
-        }
+        setTimeout(async () => {
+          try {
+            const result = await supabase.from('exhibitions').insert({
+              id: exhibition.id,
+              title: exhibition.title,
+              location: exhibition.location,
+              year: exhibition.year,
+              image_url: exhibition.imageUrl,
+              description: exhibition.description,
+              gallery_images: exhibition.galleryImages || [],
+              video_url: exhibition.videoUrl || null,
+              order: exhibition.order
+            });
+            console.log("[CREATE] Exposition sauvegardée dans Supabase:", result);
+          } catch (e) {
+            console.warn('[CREATE] Erreur sauvegarde Supabase exhibition:', e);
+          }
+        }, 100);
       }
       
-      res.status(201).json(exhibition);
     } catch (error) {
       console.error('[CREATE] Erreur création exposition:', error);
       res.status(400).json({ error: "Invalid exhibition data" });
