@@ -85,52 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all artworks
   app.get("/api/artworks", async (req, res) => {
     try {
-      let artworks;
-      
-      // Essayer de lire depuis Supabase d'abord
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('artworks')
-            .select('*')
-            .eq('is_visible', true)
-            .order('order', { ascending: true });
-          
-          if (!error && data) {
-            console.log(`[READ] ${data.length} artworks trouvés dans Supabase`);
-            artworks = data.map(artwork => ({
-              id: artwork.id,
-              title: artwork.title,
-              imageUrl: artwork.image_url,
-              dimensions: artwork.dimensions,
-              technique: artwork.technique,
-              year: artwork.year,
-              description: artwork.description,
-              isVisible: artwork.is_visible,
-              showInSlider: artwork.show_in_slider,
-              order: artwork.order
-            }));
-          } else {
-            console.log('[READ] Erreur Supabase:', error);
-          }
-        } catch (e) {
-          console.warn('Erreur lecture Supabase artworks:', e);
-        }
-      }
-      
-      // Fallback vers le storage local si Supabase échoue
-      if (!artworks) {
-        console.log('[READ] Fallback vers storage local');
-        artworks = await storage.getArtworks();
-      }
-      
-      console.log(`[READ] Retour de ${artworks?.length || 0} artworks`);
-      
-      // Ajouter des headers pour éviter le cache
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-      
+      const artworks = await storage.getArtworks();
       res.json(artworks);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch artworks" });
@@ -213,50 +168,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/artworks", requireAdmin, async (req, res) => {
     try {
       const validatedData = insertArtworkSchema.parse(req.body);
-      
-      // Créer directement dans Supabase si disponible
-      if (supabase) {
-        try {
-          // Générer un ID unique
-          const id = Date.now();
-          
-          const { data, error } = await supabase.from('artworks').insert({
-            id: id,
-            title: validatedData.title,
-            image_url: validatedData.imageUrl,
-            dimensions: validatedData.dimensions,
-            technique: validatedData.technique,
-            year: validatedData.year,
-            description: validatedData.description,
-            is_visible: validatedData.isVisible ?? true,
-            show_in_slider: validatedData.showInSlider ?? true,
-            order: validatedData.order ?? 0
-          }).select().single();
-          
-          if (error) throw error;
-          
-          // Convertir au format attendu par le frontend
-          const artwork = {
-            id: data.id,
-            title: data.title,
-            imageUrl: data.image_url,
-            dimensions: data.dimensions,
-            technique: data.technique,
-            year: data.year,
-            description: data.description,
-            isVisible: data.is_visible,
-            showInSlider: data.show_in_slider,
-            order: data.order
-          };
-          
-          return res.status(201).json(artwork);
-        } catch (e) {
-          console.warn('Erreur création Supabase artwork:', e);
-          // Fallback vers le storage local si Supabase échoue
-        }
-      }
-      
-      // Fallback: créer dans le storage local
       const artwork = await storage.createArtwork(validatedData);
       res.status(201).json(artwork);
     } catch (error) {
@@ -267,39 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all exhibitions
   app.get("/api/exhibitions", async (req, res) => {
     try {
-      let exhibitions;
-      
-      // Essayer de lire depuis Supabase d'abord
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('exhibitions')
-            .select('*')
-            .order('order', { ascending: true });
-          
-          if (!error && data) {
-            exhibitions = data.map(exhibition => ({
-              id: exhibition.id,
-              title: exhibition.title,
-              location: exhibition.location,
-              year: exhibition.year,
-              imageUrl: exhibition.image_url,
-              description: exhibition.description,
-              galleryImages: exhibition.gallery_images || [],
-              videoUrl: exhibition.video_url,
-              order: exhibition.order
-            }));
-          }
-        } catch (e) {
-          console.warn('Erreur lecture Supabase exhibitions:', e);
-        }
-      }
-      
-      // Fallback vers le storage local si Supabase échoue
-      if (!exhibitions) {
-        exhibitions = await storage.getExhibitions();
-      }
-      
+      const exhibitions = await storage.getExhibitions();
       res.setHeader("Cache-Control", "no-store");
       res.json(exhibitions);
     } catch (error) {
@@ -315,18 +194,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Format invalide" });
       }
       await storage.reorderExhibitions(newOrder);
-      
-      // Sauvegarder aussi dans Supabase pour la persistance
-      if (supabase) {
-        try {
-          for (const { id, order } of newOrder) {
-            await supabase.from('exhibitions').update({ order }).eq('id', id);
-          }
-        } catch (e) {
-          console.warn('Erreur sauvegarde Supabase exhibitions order:', e);
-        }
-      }
-      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Erreur lors du réordonnancement des expositions" });
@@ -351,48 +218,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/exhibitions", requireAdmin, async (req, res) => {
     try {
       const validatedData = insertExhibitionSchema.parse(req.body);
-      
-      // Créer directement dans Supabase si disponible
-      if (supabase) {
-        try {
-          // Générer un ID unique
-          const id = Date.now();
-          
-          const { data, error } = await supabase.from('exhibitions').insert({
-            id: id,
-            title: validatedData.title,
-            location: validatedData.location,
-            year: validatedData.year,
-            image_url: validatedData.imageUrl,
-            description: validatedData.description,
-            gallery_images: validatedData.galleryImages || [],
-            video_url: validatedData.videoUrl || null,
-            order: validatedData.order ?? 0
-          }).select().single();
-          
-          if (error) throw error;
-          
-          // Convertir au format attendu par le frontend
-          const exhibition = {
-            id: data.id,
-            title: data.title,
-            location: data.location,
-            year: data.year,
-            imageUrl: data.image_url,
-            description: data.description,
-            galleryImages: data.gallery_images || [],
-            videoUrl: data.video_url,
-            order: data.order
-          };
-          
-          return res.status(201).json(exhibition);
-        } catch (e) {
-          console.warn('Erreur création Supabase exhibition:', e);
-          // Fallback vers le storage local si Supabase échoue
-        }
-      }
-      
-      // Fallback: créer dans le storage local
       const exhibition = await storage.createExhibition(validatedData);
       res.status(201).json(exhibition);
     } catch (error) {
@@ -437,56 +262,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/artworks/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      console.log(`[DELETE] Tentative suppression artwork ID: ${id}`);
-      
-      let existing = await storage.getArtwork(id);
-      let foundInSupabase = false;
-      
-      // Vérifier d'abord dans Supabase si l'œuvre existe
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('artworks')
-            .select('*')
-            .eq('id', id)
-            .single();
-          
-          if (data && !error) {
-            foundInSupabase = true;
-            console.log(`[DELETE] Artwork ${id} trouvé dans Supabase: ${data.title}`);
-            
-            // Supprimer de Supabase
-            await supabase.from('artworks').delete().eq('id', id);
-            
-            // Supprimer l'image si elle est sur Supabase
-            if (data.image_url && data.image_url.startsWith("http")) {
-              try {
-                await deleteSupabasePublicFile(data.image_url);
-              } catch (e) {
-                console.warn('Erreur suppression image Supabase:', e);
-              }
-            }
-          }
-        } catch (e) {
-          console.warn('Erreur vérification Supabase:', e);
-        }
-      }
-      
-      // Supprimer du storage local si trouvé
-      if (existing) {
-        console.log(`[DELETE] Artwork trouvé localement: ${existing.title}`);
-        const deleted = await storage.deleteArtwork(id);
-        if (!deleted) {
-          console.log(`[DELETE] Échec suppression artwork ${id} du storage local`);
-        }
-      }
-      
-      // Si ni Supabase ni local, erreur
-      if (!foundInSupabase && !existing) {
-        console.log(`[DELETE] Artwork ${id} non trouvé nulle part`);
+      const existing = await storage.getArtwork(id);
+      const deleted = await storage.deleteArtwork(id);
+      if (!deleted) {
         return res.status(404).json({ error: "Artwork not found" });
       }
-      
+      if (supabase && existing?.imageUrl && existing.imageUrl.startsWith("http")) {
+        try { await deleteSupabasePublicFile(existing.imageUrl); } catch {}
+      }
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete artwork" });
@@ -577,18 +360,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!expo) {
         return res.status(404).json({ error: "Exposition non trouvée" });
       }
-      
-      // Sauvegarder aussi dans Supabase pour la persistance
-      if (supabase) {
-        try {
-          await supabase.from('exhibitions').update({
-            gallery_images: galleryImages
-          }).eq('id', id);
-        } catch (e) {
-          console.warn('Erreur sauvegarde Supabase gallery:', e);
-        }
-      }
-      
       res.json(expo);
     } catch (error) {
       res.status(500).json({ error: "Erreur lors de la mise à jour de la galerie" });
@@ -603,15 +374,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deleted = await storage.deleteExhibition(id);
       if (!deleted) {
         return res.status(404).json({ error: "Exposition non trouvée" });
-      }
-      
-      // Supprimer aussi de Supabase pour la persistance
-      if (supabase) {
-        try {
-          await supabase.from('exhibitions').delete().eq('id', id);
-        } catch (e) {
-          console.warn('Erreur suppression Supabase exhibition:', e);
-        }
       }
       if (existing) {
         // Supprimer l'image de couverture
@@ -667,23 +429,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/artworks/order", requireAdmin, async (req, res) => {
     try {
       const newOrder = req.body;
-      console.log("[DEBUG] Reorder artworks reçu:", JSON.stringify(newOrder));
       if (!Array.isArray(newOrder)) {
         return res.status(400).json({ error: "Format invalide" });
       }
       await storage.reorderArtworks(newOrder);
-      
-      // Sauvegarder aussi dans Supabase pour la persistance
-      if (supabase) {
-        try {
-          for (const { id, order } of newOrder) {
-            await supabase.from('artworks').update({ order }).eq('id', id);
-          }
-        } catch (e) {
-          console.warn('Erreur sauvegarde Supabase order:', e);
-        }
-      }
-      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Erreur lors du réordonnancement" });
