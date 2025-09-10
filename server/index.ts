@@ -46,11 +46,14 @@ if (app.get("env") === "development") {
           "https://images.pexels.com",
           "https://www.googleapis.com",
           "https://www.galerie-breheret.com",
-          "https://i-de.unimedias.fr"
+          "https://i-de.unimedias.fr",
+          "https://www.casting.fr",
+          "https://*.casting.fr"
         ],
         frameSrc: ["'self'", "https://www.youtube.com"],
         connectSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
       }
