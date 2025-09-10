@@ -27,8 +27,7 @@ CREATE TABLE IF NOT EXISTS exhibitions (
   description TEXT NOT NULL,
   gallery_images JSONB DEFAULT '[]'::jsonb,
   video_url TEXT,
-  "order" INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  "order" INTEGER NOT NULL DEFAULT 0, 
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
