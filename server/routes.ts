@@ -219,18 +219,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const exhibitions = await storage.getExhibitions();
       console.log(`[EXHIBITIONS] Local exhibitions count: ${exhibitions.length}`);
       
-      // Essayer de lire depuis Supabase en parallèle (sans bloquer)
+      // Si on a des données locales, on les renvoie IMMÉDIATEMENT
+      if (Array.isArray(exhibitions) && exhibitions.length > 0) {
+        console.log(`[EXHIBITIONS] Returning LOCAL exhibitions (priority): ${exhibitions.length}`);
+        res.setHeader("Cache-Control", "no-store");
+        return res.json(exhibitions);
+      }
+
+      // Sinon, essayer de lire depuis Supabase (fallback)
       if (supabase) {
         try {
           const { data, error } = await supabase
             .from('exhibitions')
             .select('*')
             .order('order', { ascending: true });
-          
           console.log(`[EXHIBITIONS] Supabase exhibitions count: ${data?.length || 0}`);
-          
           if (!error && data && data.length > 0) {
-            // Si Supabase a des données, les utiliser
             const supabaseExhibitions = data.map(exhibition => ({
               id: exhibition.id,
               title: exhibition.title,
@@ -242,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               videoUrl: exhibition.video_url,
               order: exhibition.order
             }));
-            console.log(`[EXHIBITIONS] Returning Supabase exhibitions: ${supabaseExhibitions.length}`);
+            console.log(`[EXHIBITIONS] Returning Supabase exhibitions (fallback): ${supabaseExhibitions.length}`);
             res.setHeader("Cache-Control", "no-store");
             return res.json(supabaseExhibitions);
           }
@@ -250,10 +254,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.warn('Erreur lecture Supabase exhibitions (fallback local):', e);
         }
       }
-      
-      console.log(`[EXHIBITIONS] Returning local exhibitions: ${exhibitions.length}`);
+
+      console.log(`[EXHIBITIONS] No data in Supabase, returning empty local list`);
       res.setHeader("Cache-Control", "no-store");
-      res.json(exhibitions);
+      return res.json(exhibitions);
     } catch (error) {
       console.error('[EXHIBITIONS] Error:', error);
       res.status(500).json({ error: "Failed to fetch exhibitions" });
