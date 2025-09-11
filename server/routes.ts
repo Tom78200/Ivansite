@@ -85,11 +85,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all artworks
   app.get("/api/artworks", async (req, res) => {
     try {
-      // TOUJOURS lire depuis le storage local d'abord pour que ça marche
+      // Lire depuis le storage local d'abord
       const artworks = await storage.getArtworks();
       console.log(`[ARTWORKS] Local artworks count: ${artworks.length}`);
-      
-      // Essayer de lire depuis Supabase en parallèle (sans bloquer)
+
+      // Si on a des données locales, les renvoyer IMMÉDIATEMENT (priorité locale)
+      if (Array.isArray(artworks) && artworks.length > 0) {
+        console.log(`[ARTWORKS] Returning LOCAL artworks (priority): ${artworks.length}`);
+        return res.json(artworks);
+      }
+
+      // Sinon, fallback Supabase
       if (supabase) {
         try {
           const { data, error } = await supabase
@@ -97,11 +103,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .select('*')
             .eq('is_visible', true)
             .order('order', { ascending: true });
-          
           console.log(`[ARTWORKS] Supabase artworks count: ${data?.length || 0}`);
-          
           if (!error && data && data.length > 0) {
-            // Si Supabase a des données, les utiliser
             const supabaseArtworks = data.map(artwork => ({
               id: artwork.id,
               title: artwork.title,
@@ -114,16 +117,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               showInSlider: artwork.show_in_slider,
               order: artwork.order
             }));
-            console.log(`[ARTWORKS] Returning Supabase artworks: ${supabaseArtworks.length}`);
+            console.log(`[ARTWORKS] Returning Supabase artworks (fallback): ${supabaseArtworks.length}`);
             return res.json(supabaseArtworks);
           }
         } catch (e) {
           console.warn('Erreur lecture Supabase artworks (fallback local):', e);
         }
       }
-      
-      console.log(`[ARTWORKS] Returning local artworks: ${artworks.length}`);
-      res.json(artworks);
+
+      console.log(`[ARTWORKS] No data in Supabase, returning empty local list`);
+      return res.json(artworks);
     } catch (error) {
       console.error('[ARTWORKS] Error:', error);
       res.status(500).json({ error: "Failed to fetch artworks" });
@@ -184,29 +187,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/artworks", async (req, res) => {
     try {
       const validatedData = insertArtworkSchema.parse(req.body);
+      // Créer localement en priorité
       const artwork = await storage.createArtwork(validatedData);
-      
-      // Sauvegarder aussi dans Supabase pour la persistance
-      if (supabase) {
-        try {
-          await supabase.from('artworks').insert({
-            id: artwork.id,
-            title: artwork.title,
-            image_url: artwork.imageUrl,
-            dimensions: artwork.dimensions,
-            technique: artwork.technique,
-            year: artwork.year,
-            description: artwork.description,
-            is_visible: artwork.isVisible,
-            show_in_slider: artwork.showInSlider,
-            order: artwork.order
-          });
-        } catch (e) {
-          console.warn('Erreur sauvegarde Supabase artwork:', e);
-        }
-      }
-      
+
+      // Répondre immédiatement pour affichage instantané
       res.status(201).json(artwork);
+
+      // Sauvegarder dans Supabase en arrière-plan (non bloquant)
+      if (supabase) {
+        setTimeout(async () => {
+          try {
+            await supabase.from('artworks').insert({
+              id: artwork.id,
+              title: artwork.title,
+              image_url: artwork.imageUrl,
+              dimensions: artwork.dimensions,
+              technique: artwork.technique,
+              year: artwork.year,
+              description: artwork.description,
+              is_visible: artwork.isVisible,
+              show_in_slider: artwork.showInSlider,
+              order: artwork.order
+            });
+            console.log('[CREATE] Artwork sauvegardé dans Supabase:', artwork.id);
+          } catch (e) {
+            console.warn('Erreur sauvegarde Supabase artwork (non bloquant):', e);
+          }
+        }, 100);
+      }
     } catch (error) {
       res.status(400).json({ error: "Invalid artwork data" });
     }
