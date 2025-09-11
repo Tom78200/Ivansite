@@ -81,65 +81,48 @@ async function deleteSupabasePublicFile(publicUrl: string): Promise<void> {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Hydratation au démarrage: si Supabase est dispo, aligner le local une fois
+  // Hydratation au démarrage (synchrone): si Supabase a des données, écraser le local
   if (supabase) {
-    (async () => {
-      try {
-        console.log('[BOOT] Hydratation du stockage local depuis Supabase...');
-        // Artworks
-        try {
-          const { data } = await supabase
-            .from('artworks')
-            .select('*')
-            .eq('is_visible', true)
-            .order('order', { ascending: true });
-          if (data && data.length > 0) {
-            const supabaseArtworks = data.map(artwork => ({
-              id: artwork.id,
-              title: artwork.title,
-              imageUrl: artwork.image_url,
-              dimensions: artwork.dimensions,
-              technique: artwork.technique,
-              year: artwork.year,
-              description: artwork.description,
-              isVisible: artwork.is_visible,
-              showInSlider: artwork.show_in_slider,
-              order: artwork.order
-            }));
-            await storage.setArtworks(supabaseArtworks as any);
-            console.log('[BOOT] Artworks hydratés');
-          }
-        } catch (e) {
-          console.warn('[BOOT] Échec hydratation artworks:', e);
-        }
-        // Exhibitions
-        try {
-          const { data } = await supabase
-            .from('exhibitions')
-            .select('*')
-            .order('order', { ascending: true });
-          if (data && data.length > 0) {
-            const supabaseExhibitions = data.map(exhibition => ({
-              id: exhibition.id,
-              title: exhibition.title,
-              location: exhibition.location,
-              year: exhibition.year,
-              imageUrl: exhibition.image_url,
-              description: exhibition.description,
-              galleryImages: exhibition.gallery_images || [],
-              videoUrl: exhibition.video_url,
-              order: exhibition.order
-            }));
-            await storage.setExhibitions(supabaseExhibitions as any);
-            console.log('[BOOT] Exhibitions hydratées');
-          }
-        } catch (e) {
-          console.warn('[BOOT] Échec hydratation exhibitions:', e);
-        }
-      } catch (e) {
-        console.warn('[BOOT] Hydratation globale échouée:', e);
+    try {
+      console.log('[BOOT] Hydratation synchrone depuis Supabase...');
+      const [aw, ex] = await Promise.all([
+        supabase.from('artworks').select('*').eq('is_visible', true).order('order', { ascending: true }),
+        supabase.from('exhibitions').select('*').order('order', { ascending: true }),
+      ]);
+      if (aw?.data && aw.data.length > 0) {
+        const supabaseArtworks = aw.data.map((artwork: any) => ({
+          id: artwork.id,
+          title: artwork.title,
+          imageUrl: artwork.image_url,
+          dimensions: artwork.dimensions,
+          technique: artwork.technique,
+          year: artwork.year,
+          description: artwork.description,
+          isVisible: artwork.is_visible,
+          showInSlider: artwork.show_in_slider,
+          order: artwork.order
+        }));
+        await storage.setArtworks(supabaseArtworks as any);
+        console.log('[BOOT] Artworks hydratés');
       }
-    })();
+      if (ex?.data && ex.data.length > 0) {
+        const supabaseExhibitions = ex.data.map((exhibition: any) => ({
+          id: exhibition.id,
+          title: exhibition.title,
+          location: exhibition.location,
+          year: exhibition.year,
+          imageUrl: exhibition.image_url,
+          description: exhibition.description,
+          galleryImages: exhibition.gallery_images || [],
+          videoUrl: exhibition.video_url,
+          order: exhibition.order
+        }));
+        await storage.setExhibitions(supabaseExhibitions as any);
+        console.log('[BOOT] Exhibitions hydratées');
+      }
+    } catch (e) {
+      console.warn('[BOOT] Hydratation synchrone échouée:', e);
+    }
   }
   
   // Get all artworks
