@@ -412,51 +412,7 @@ export default function About() {
                         </AnimatePresence>
                       </div>
 
-                      {/* Photos d'ambiance en dessous du texte */}
-                      <div className="mt-12">
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={step}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-                          >
-                            {/* Sur mobile, on ne garde que la première image d'ambiance */}
-                            {stepPhotos[step]?.map((photo, index) => (
-                              <motion.div
-                                key={`${step}-${index}`}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ 
-                                  duration: 0.5,
-                                  delay: 2 + (index * 0.3),
-                                  ease: "easeOut"
-                                }}
-                                className={`relative aspect-[3/4] group ${(index !== 0 ? 'hidden md:block' : '')}`}
-                              >
-                                <div className="w-full h-full rounded-lg overflow-hidden border border-white/10 shadow-2xl">
-                                  <img
-                                    src={photo.url}
-                                    alt={photo.caption ? `${photo.caption} - Ivan Gauthier, artiste peintre contemporain` : `Ambiance ${index + 1} - Ivan Gauthier, artiste peintre contemporain`}
-                                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                                    loading="lazy"
-                                    width="400"
-                                    height="600"
-                                  />
-                                  {photo.caption && (
-                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                      <p className="text-white font-medium text-lg">{photo.caption}</p>
-                                    </div>
-                                  )}
-                                </div>
-                              </motion.div>
-                            ))}
-                          </motion.div>
-                          {/* Lien œuvres phares retiré */}
-                        </AnimatePresence>
-                      </div>
+                      {/* Bloc photos d'ambiance retiré à la demande (plus aucune image supplémentaire) */}
                     </div>
                   </div>
                 </div>

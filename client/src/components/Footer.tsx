@@ -35,10 +35,13 @@ export default function Footer() {
             ))}
             <a
               href="https://www.tiktok.com/@ivan.gauthier"
-              className="text-white/60 hover:text-white transition-all duration-300 text-sm"
+              className="text-white/60 hover:text-white transition-all duration-300"
               aria-label="TikTok"
+              title="TikTok"
             >
-              TikTok
+              <svg width="24" height="24" viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+                <path d="M41 18.2c-4.6-.4-8.2-2.4-10.8-6V33c0 6.7-5.4 12-12.1 12S6 39.7 6 33.1c0-6.7 5.4-12.1 12.1-12.1 1 0 2 .1 2.9.4v6.6c-.9-.6-2-.9-3.2-.9-3.1 0-5.6 2.5-5.6 5.6S14.7 38.3 17.8 38.3 23.4 35.8 23.4 32.7V3h6.8c1.1 4.9 4.8 8.4 10.7 9.1v6.1z"/>
+              </svg>
             </a>
           </div>
 
