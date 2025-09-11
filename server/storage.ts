@@ -126,10 +126,12 @@ export interface IStorage {
   getArtworks(): Promise<Artwork[]>;
   getArtwork(id: number): Promise<Artwork | undefined>;
   createArtwork(artwork: InsertArtwork): Promise<Artwork>;
+  setArtworks(list: Artwork[]): Promise<void>;
   
   getExhibitions(): Promise<Exhibition[]>;
   getExhibition(id: number): Promise<Exhibition | undefined>;
   createExhibition(exhibition: InsertExhibition): Promise<Exhibition>;
+  setExhibitions(list: Exhibition[]): Promise<void>;
   reorderExhibitions(newOrder: {id: number, order: number}[]): Promise<void>;
   
   createContactMessage(message: InsertContactMessage): Promise<ContactMessage>;
@@ -283,6 +285,15 @@ export class MemStorage implements IStorage {
     return sorted as Exhibition[];
   }
 
+  async setArtworks(list: Artwork[]): Promise<void> {
+    // Remplace tout le contenu local par la liste fournie
+    this.artworks = new Map(list.map(a => [a.id, a]));
+    // Maintenir currentArtworkId
+    const maxId = list.reduce((m, a) => Math.max(m, a.id), 0);
+    this.currentArtworkId = Math.max(this.currentArtworkId, maxId + 1);
+    this.saveArtworks();
+  }
+
   async getExhibition(id: number): Promise<Exhibition | undefined> {
     return this.exhibitions.get(id);
   }
@@ -300,6 +311,13 @@ export class MemStorage implements IStorage {
     this.exhibitions.set(id, exhibition);
     this.saveExhibitions();
     return exhibition;
+  }
+
+  async setExhibitions(list: Exhibition[]): Promise<void> {
+    this.exhibitions = new Map(list.map(e => [e.id, e]));
+    const maxId = list.reduce((m, e) => Math.max(m, e.id), 0);
+    this.currentExhibitionId = Math.max(this.currentExhibitionId, maxId + 1);
+    this.saveExhibitions();
   }
 
   async createContactMessage(insertMessage: InsertContactMessage): Promise<ContactMessage> {

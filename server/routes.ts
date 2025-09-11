@@ -92,7 +92,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Si on a des données locales, les renvoyer IMMÉDIATEMENT (priorité locale)
       if (Array.isArray(artworks) && artworks.length > 0) {
         console.log(`[ARTWORKS] Returning LOCAL artworks (priority): ${artworks.length}`);
-        return res.json(artworks);
+        res.json(artworks);
+        // Synchronisation en arrière-plan pour éviter la résurrection d'anciennes données locales
+        if (supabase) {
+          (async () => {
+            try {
+              const { data, error } = await supabase
+                .from('artworks')
+                .select('*')
+                .eq('is_visible', true)
+                .order('order', { ascending: true });
+              if (!error && data && data.length > 0) {
+                const supabaseArtworks = data.map(artwork => ({
+                  id: artwork.id,
+                  title: artwork.title,
+                  imageUrl: artwork.image_url,
+                  dimensions: artwork.dimensions,
+                  technique: artwork.technique,
+                  year: artwork.year,
+                  description: artwork.description,
+                  isVisible: artwork.is_visible,
+                  showInSlider: artwork.show_in_slider,
+                  order: artwork.order
+                }));
+                await storage.setArtworks(supabaseArtworks as any);
+                console.log('[ARTWORKS] Local store synced from Supabase (background)');
+              }
+            } catch (e) {
+              console.warn('[ARTWORKS] Background sync failed:', e);
+            }
+          })();
+        }
+        return;
       }
 
       // Sinon, fallback Supabase
@@ -117,6 +148,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               showInSlider: artwork.show_in_slider,
               order: artwork.order
             }));
+            // Quand on utilise le fallback, garder le local aligné
+            try {
+              await storage.setArtworks(supabaseArtworks as any);
+              console.log('[ARTWORKS] Local store synced from Supabase (fallback)');
+            } catch (e) {
+              console.warn('[ARTWORKS] Local sync failed:', e);
+            }
             console.log(`[ARTWORKS] Returning Supabase artworks (fallback): ${supabaseArtworks.length}`);
             return res.json(supabaseArtworks);
           }
@@ -231,7 +269,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (Array.isArray(exhibitions) && exhibitions.length > 0) {
         console.log(`[EXHIBITIONS] Returning LOCAL exhibitions (priority): ${exhibitions.length}`);
         res.setHeader("Cache-Control", "no-store");
-        return res.json(exhibitions);
+        res.json(exhibitions);
+        // Synchronisation en arrière-plan depuis Supabase pour écraser les anciennes données locales
+        if (supabase) {
+          (async () => {
+            try {
+              const { data, error } = await supabase
+                .from('exhibitions')
+                .select('*')
+                .order('order', { ascending: true });
+              if (!error && data && data.length > 0) {
+                const supabaseExhibitions = data.map(exhibition => ({
+                  id: exhibition.id,
+                  title: exhibition.title,
+                  location: exhibition.location,
+                  year: exhibition.year,
+                  imageUrl: exhibition.image_url,
+                  description: exhibition.description,
+                  galleryImages: exhibition.gallery_images || [],
+                  videoUrl: exhibition.video_url,
+                  order: exhibition.order
+                }));
+                await storage.setExhibitions(supabaseExhibitions as any);
+                console.log('[EXHIBITIONS] Local store synced from Supabase (background)');
+              }
+            } catch (e) {
+              console.warn('[EXHIBITIONS] Background sync failed:', e);
+            }
+          })();
+        }
+        return;
       }
 
       // Sinon, essayer de lire depuis Supabase (fallback)
@@ -254,6 +321,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               videoUrl: exhibition.video_url,
               order: exhibition.order
             }));
+            // Synchroniser aussi le local quand on utilise Supabase en fallback
+            try {
+              await storage.setExhibitions(supabaseExhibitions as any);
+              console.log('[EXHIBITIONS] Local store synced from Supabase (fallback)');
+            } catch (e) {
+              console.warn('[EXHIBITIONS] Local sync failed:', e);
+            }
             console.log(`[EXHIBITIONS] Returning Supabase exhibitions (fallback): ${supabaseExhibitions.length}`);
             res.setHeader("Cache-Control", "no-store");
             return res.json(supabaseExhibitions);
