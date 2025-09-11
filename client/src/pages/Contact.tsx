@@ -93,12 +93,12 @@ export default function Contact() {
       <section className="min-h-screen pt-28 md:pt-24 pb-16 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
           <div
-            className="text-center mb-10 md:mb-16 transform-gpu will-change-transform antialiased"
+            className="text-center mb-10 md:mb-16 antialiased"
           >
-            <h1 className="text-4xl md:text-6xl font-playfair mb-4 md:mb-6 text-white md:bg-gradient-to-r md:from-white md:via-blue-100 md:to-white md:bg-clip-text md:text-transparent">
+            <h1 className="text-4xl md:text-6xl font-playfair mb-4 md:mb-6 text-white">
               Contact
             </h1>
-            <p className="text-base md:text-lg text-white/70 max-w-2xl mx-auto transform-gpu will-change-transform">
+            <p className="text-base md:text-lg text-white/70 max-w-2xl mx-auto">
               Que ce soit pour un projet de collaboration, une acquisition d'œuvre ou toute autre demande, 
               n'hésitez pas à me contacter.
             </p>
