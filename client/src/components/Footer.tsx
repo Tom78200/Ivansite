@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
-import { Instagram, Twitter, Facebook, Linkedin } from "lucide-react";
+import { Instagram, Facebook, Linkedin } from "lucide-react";
 
 export default function Footer() {
   const socialLinks = [
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
+    { icon: Instagram, href: "https://www.instagram.com/ivan_gauthier.art/", label: "Instagram" },
+    { icon: Facebook, href: "https://www.facebook.com/people/Ivan-Gauthier/pfbid02U73yjwshjppWZq7RvudSg8mgvTBsm9gDcrTPHdoi4bcR8ErUBZP518YQmVp3EDPcl/?ref=_ig_profile_ac", label: "Facebook" },
+    { icon: Linkedin, href: "https://fr.linkedin.com/in/ivan-gauthier-b5636220a", label: "LinkedIn" },
+    // TikTok icon not in lucide-react by default; using plain link text
   ];
 
   return (
@@ -22,7 +22,7 @@ export default function Footer() {
           </div>
 
           {/* Center - Social Links */}
-          <div className="flex justify-center space-x-6">
+          <div className="flex justify-center flex-wrap gap-6">
             {socialLinks.map(({ icon: Icon, href, label }) => (
               <a
                 key={label}
@@ -33,6 +33,13 @@ export default function Footer() {
                 <Icon size={24} />
               </a>
             ))}
+            <a
+              href="https://www.tiktok.com/@ivan.gauthier"
+              className="text-white/60 hover:text-white transition-all duration-300 text-sm"
+              aria-label="TikTok"
+            >
+              TikTok
+            </a>
           </div>
 
           {/* Right - Copyright */}
@@ -44,6 +51,19 @@ export default function Footer() {
               Tous droits réservés
             </p>
           </div>
+        </div>
+
+        {/* Legal links */}
+        <div className="mt-10 pt-6 border-t border-white/10 text-center text-xs text-white/60 space-x-3">
+          <a href="/mentions-legales" className="hover:text-white">Mentions légales</a>
+          <span>·</span>
+          <a href="/confidentialite" className="hover:text-white">Confidentialité</a>
+          <span>·</span>
+          <a href="/cookies" className="hover:text-white">Cookies</a>
+          <span>·</span>
+          <a href="/conditions" className="hover:text-white">Conditions d’utilisation</a>
+          <span>·</span>
+          <a href="/accessibilite" className="hover:text-white">Accessibilité</a>
         </div>
       </div>
     </footer>
