@@ -149,22 +149,7 @@ export default function Gallery() {
           <div className="md:hidden absolute top-1/2 left-1/2 z-20 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none select-none w-full px-4">
             <h1 className="text-4xl xs:text-5xl font-playfair text-white mb-2 tracking-wider uppercase">IVAN GAUTHIER</h1>
             <p className="text-base text-white opacity-80 tracking-[0.2em] uppercase mb-4">Artiste Contemporain</p>
-            {/* Bouton 'Voir les œuvres phares' mobile uniquement */}
-            <div className="flex justify-center w-full mb-2 pointer-events-auto select-auto md:hidden">
-              <a
-                href="/galerie/phares"
-                className="relative text-lg font-semibold text-white/90 hover:text-blue-400 transition-colors duration-200 underline-offset-8 decoration-2 flex items-center gap-2 bg-black/30 px-5 py-2 rounded-lg shadow-lg"
-                style={{textDecoration: 'none'}}
-              >
-                <span className="animate-wiggle">Voir les œuvres phares</span>
-                <span className="inline-block animate-bounce-slow opacity-70">
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="6" y="2" width="10" height="18" rx="5" fill="none" stroke="#e5e7eb" strokeWidth="2"/>
-                    <circle cx="11" cy="7" r="1.2" fill="#e5e7eb"/>
-                  </svg>
-                </span>
-              </a>
-            </div>
+            {/* Bouton 'Voir les œuvres phares' retiré sur mobile */}
           </div>
           {/* Nom centré desktop */}
           <motion.div

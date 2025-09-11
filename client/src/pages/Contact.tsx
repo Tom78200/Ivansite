@@ -87,76 +87,27 @@ export default function Contact() {
   return (
     <>
       <Helmet>
-        <title>Contact — Ivan Gauthier, Artiste Peintre</title>
-        <meta name="description" content="Contactez Ivan Gauthier, artiste peintre contemporain. Demande d'informations, expositions, achats d'œuvres, collaborations." />
-        <link rel="canonical" href="https://www.ivangauthier.com/contact" />
-        <meta name="keywords" content="contact Ivan Gauthier, artiste peintre, expositions, achat d'œuvres, collaboration, Paris" />
-        <meta property="og:title" content="Contact — Ivan Gauthier, Artiste Peintre" />
-        <meta property="og:description" content="Contactez Ivan Gauthier pour vos projets artistiques, expositions et collaborations." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.ivangauthier.com/contact" />
-        <meta property="og:image" content="https://www.ivangauthier.com/generated-icon.png" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Contact — Ivan Gauthier" />
-        <meta name="twitter:description" content="Contactez Ivan Gauthier, artiste peintre contemporain." />
-        <meta name="twitter:image" content="https://www.ivangauthier.com/generated-icon.png" />
-        <script type="application/ld+json">{`
-          {
-            "@context": "https://schema.org",
-            "@type": "ContactPage",
-            "name": "Contact Ivan Gauthier",
-            "description": "Contactez Ivan Gauthier, artiste peintre contemporain. Demande d'informations, expositions, achats d'œuvres, collaborations.",
-            "url": "https://www.ivangauthier.com/contact",
-            "mainEntity": {
-              "@type": "Person",
-              "name": "Ivan Gauthier",
-              "jobTitle": "Artiste Peintre Contemporain",
-              "email": "ivangauthier009@gmail.com",
-              "telephone": "0677363502",
-              "address": {
-                "@type": "PostalAddress",
-                "addressLocality": "Paris",
-                "addressCountry": "FR"
-              }
-            },
-            "breadcrumb": {
-              "@type": "BreadcrumbList",
-              "itemListElement": [
-                {
-                  "@type": "ListItem",
-                  "position": 1,
-                  "name": "Accueil",
-                  "item": "https://www.ivangauthier.com/"
-                },
-                {
-                  "@type": "ListItem",
-                  "position": 2,
-                  "name": "Contact",
-                  "item": "https://www.ivangauthier.com/contact"
-                }
-              ]
-            }
-          }
-        `}</script>
+        <title>Contact - Ivan Gauthier</title>
+        <meta name="description" content="Contactez Ivan Gauthier pour toute demande d'information, d'exposition ou de collaboration artistique." />
       </Helmet>
-      <section className="min-h-screen py-24 px-8">
+      <section className="min-h-screen py-20 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
           <div
-            className="text-center mb-16"
+            className="text-center mb-10 md:mb-16"
           >
-            <h1 className="text-5xl md:text-7xl font-playfair mb-6 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-6xl font-playfair mb-4 md:mb-6 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
               Contact
             </h1>
-            <p className="text-xl text-white/70 max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-white/70 max-w-2xl mx-auto">
               Que ce soit pour un projet de collaboration, une acquisition d'œuvre ou toute autre demande, 
               n'hésitez pas à me contacter.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16">
+          <div className="grid lg:grid-cols-2 gap-10 md:gap-16">
             {/* Contact Info */}
             <div className="space-y-8">
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
                 <h3 className="text-2xl font-playfair mb-8 text-white">Informations de contact</h3>
                 <div className="space-y-6">
                   {contactInfo.map(({ icon: Icon, text, label }, index) => (
@@ -169,14 +120,14 @@ export default function Contact() {
                       </div>
                       <div>
                         <p className="text-white/60 text-sm">{label}</p>
-                        <p className="text-white text-lg">{text}</p>
+                        <p className="text-white text-base md:text-lg break-words">{text}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
                 <h3 className="text-xl font-playfair mb-4 text-white">Horaires d'atelier</h3>
                 <p className="text-white/80">
                   Lundi - Vendredi : 9h00 - 18h00<br />
@@ -190,7 +141,7 @@ export default function Contact() {
             <div>
               <form
                 onSubmit={handleSubmit}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 space-y-6"
+                className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 space-y-6"
               >
                 <h3 className="text-2xl font-playfair mb-8 text-white">Envoyez-moi un message</h3>
                 
@@ -204,7 +155,7 @@ export default function Contact() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full p-4 bg-white/10 text-white placeholder:text-white/50 rounded-xl border border-white/20 focus:border-white/50 outline-none transition-all duration-300 text-lg backdrop-blur-sm"
+                      className="w-full p-3 md:p-4 bg-white/10 text-white placeholder:text-white/50 rounded-xl border border-white/20 focus:border-white/50 outline-none transition-all duration-300 text-base md:text-lg backdrop-blur-sm"
                     />
                   </div>
                   
@@ -217,7 +168,7 @@ export default function Contact() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full p-4 bg-white/10 text-white placeholder:text-white/50 rounded-xl border border-white/20 focus:border-white/50 outline-none transition-all duration-300 text-lg backdrop-blur-sm"
+                      className="w-full p-3 md:p-4 bg-white/10 text-white placeholder:text-white/50 rounded-xl border border-white/20 focus:border-white/50 outline-none transition-all duration-300 text-base md:text-lg backdrop-blur-sm"
                     />
                   </div>
                   
@@ -230,7 +181,7 @@ export default function Contact() {
                       value={formData.message}
                       onChange={handleChange}
                       required
-                      className="w-full p-4 bg-white/10 text-white placeholder:text-white/50 rounded-xl border border-white/20 focus:border-white/50 outline-none transition-all duration-300 text-lg resize-none backdrop-blur-sm"
+                      className="w-full p-3 md:p-4 bg-white/10 text-white placeholder:text-white/50 rounded-xl border border-white/20 focus:border-white/50 outline-none transition-all duration-300 text-base md:text-lg resize-none backdrop-blur-sm"
                     />
                   </div>
                 </div>
@@ -238,7 +189,7 @@ export default function Contact() {
                 <div className="pt-4">
                   <Button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 md:py-4 rounded-lg shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                     aria-label="Envoyer le message de contact"
                     disabled={submitMessage.isPending}
                   >
