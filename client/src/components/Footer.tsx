@@ -10,7 +10,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="relative z-0 isolate bg-gradient-to-t from-black/50 to-transparent border-t border-white/10">
+    <footer className="relative z-[1] isolate bg-gradient-to-t from-black/50 to-transparent border-t border-white/10 will-change-auto">
       <div className="max-w-7xl mx-auto px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
           {/* Left - Artist Name */}

@@ -90,7 +90,7 @@ export default function Contact() {
         <title>Contact - Ivan Gauthier</title>
         <meta name="description" content="Contactez Ivan Gauthier pour toute demande d'information, d'exposition ou de collaboration artistique." />
       </Helmet>
-      <section className="min-h-screen pt-28 md:pt-24 pb-16 px-4 md:px-8">
+      <section className="min-h-[100dvh] pt-28 md:pt-24 pb-16 px-4 md:px-8 overflow-visible relative z-10">
         <div className="max-w-6xl mx-auto">
           <div
             className="text-center mb-10 md:mb-16 antialiased"
@@ -107,7 +107,7 @@ export default function Contact() {
           <div className="grid lg:grid-cols-2 gap-10 md:gap-16">
             {/* Contact Info */}
             <div className="space-y-8">
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
+              <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
                 <h3 className="text-2xl font-playfair mb-8 text-white">Informations de contact</h3>
                 <div className="space-y-6">
                   {contactInfo.map(({ icon: Icon, text, label }, index) => (
@@ -127,7 +127,7 @@ export default function Contact() {
                 </div>
               </div>
 
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
+              <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
                 <h3 className="text-xl font-playfair mb-4 text-white">Horaires d'atelier</h3>
                 <p className="text-white/80">
                   Lundi - Vendredi : 9h00 - 18h00<br />
@@ -141,7 +141,7 @@ export default function Contact() {
             <div>
               <form
                 onSubmit={handleSubmit}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 space-y-6"
+                className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 space-y-6"
               >
                 <h3 className="text-2xl font-playfair mb-8 text-white">Envoyez-moi un message</h3>
                 
