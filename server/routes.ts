@@ -128,7 +128,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all artworks
   app.get("/api/artworks", async (req, res) => {
     try {
-      // Lire depuis Supabase en priorité si configuré
+      // Lire depuis le storage local d'abord
+      const artworks = await storage.getArtworks();
+      console.log(`[ARTWORKS] Local artworks count: ${artworks.length}`);
+
+      // Si on a des données locales, les renvoyer IMMÉDIATEMENT (priorité locale) et ne PAS resynchroniser
+      if (Array.isArray(artworks) && artworks.length > 0) {
+        console.log(`[ARTWORKS] Returning LOCAL artworks (priority): ${artworks.length}`);
+        return res.json(artworks);
+      }
+
+      // Sinon, fallback Supabase
       if (supabase) {
         try {
           const { data, error } = await supabase
@@ -150,23 +160,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
               showInSlider: artwork.show_in_slider,
               order: artwork.order
             }));
-            // Synchroniser local en arrière-plan (best effort)
+            // Quand on utilise le fallback (local vide), aligner le local avec Supabase
             try {
               await storage.setArtworks(supabaseArtworks as any);
-              console.log('[ARTWORKS] Local store synced from Supabase (primary)');
+              console.log('[ARTWORKS] Local store synced from Supabase (fallback)');
             } catch (e) {
               console.warn('[ARTWORKS] Local sync failed:', e);
             }
+            console.log(`[ARTWORKS] Returning Supabase artworks (fallback): ${supabaseArtworks.length}`);
             return res.json(supabaseArtworks);
           }
         } catch (e) {
-          console.warn('Erreur lecture Supabase artworks (on fallback local):', e);
+          console.warn('Erreur lecture Supabase artworks (fallback local):', e);
         }
       }
 
-      // Fallback: lire depuis le storage local
-      const artworks = await storage.getArtworks();
-      console.log(`[ARTWORKS] Returning LOCAL artworks (fallback): ${artworks.length}`);
+      console.log(`[ARTWORKS] No data in Supabase, returning empty local list`);
       return res.json(artworks);
     } catch (error) {
       console.error('[ARTWORKS] Error:', error);
@@ -264,7 +273,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all exhibitions
   app.get("/api/exhibitions", async (req, res) => {
     try {
-      // Lire depuis Supabase en priorité si configuré
+      // TOUJOURS lire depuis le storage local d'abord pour que ça marche immédiatement
+      const exhibitions = await storage.getExhibitions();
+      console.log(`[EXHIBITIONS] Local exhibitions count: ${exhibitions.length}`);
+      
+      // Si on a des données locales, on les renvoie IMMÉDIATEMENT et on ne resynchronise pas
+      if (Array.isArray(exhibitions) && exhibitions.length > 0) {
+        console.log(`[EXHIBITIONS] Returning LOCAL exhibitions (priority): ${exhibitions.length}`);
+        res.setHeader("Cache-Control", "no-store");
+        return res.json(exhibitions);
+      }
+
+      // Sinon, essayer de lire depuis Supabase (fallback)
       if (supabase) {
         try {
           const { data, error } = await supabase
@@ -284,24 +304,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
               videoUrl: exhibition.video_url,
               order: exhibition.order
             }));
-            // Synchroniser local en arrière-plan (best effort)
+            // Synchroniser aussi le local quand on utilise Supabase en fallback
             try {
               await storage.setExhibitions(supabaseExhibitions as any);
-              console.log('[EXHIBITIONS] Local store synced from Supabase (primary)');
+              console.log('[EXHIBITIONS] Local store synced from Supabase (fallback)');
             } catch (e) {
               console.warn('[EXHIBITIONS] Local sync failed:', e);
             }
+            console.log(`[EXHIBITIONS] Returning Supabase exhibitions (fallback): ${supabaseExhibitions.length}`);
             res.setHeader("Cache-Control", "no-store");
             return res.json(supabaseExhibitions);
           }
         } catch (e) {
-          console.warn('Erreur lecture Supabase exhibitions (on fallback local):', e);
+          console.warn('Erreur lecture Supabase exhibitions (fallback local):', e);
         }
       }
 
-      // Fallback: lire depuis le storage local
-      const exhibitions = await storage.getExhibitions();
-      console.log(`[EXHIBITIONS] Returning LOCAL exhibitions (fallback): ${exhibitions.length}`);
+      console.log(`[EXHIBITIONS] No data in Supabase, returning empty local list`);
       res.setHeader("Cache-Control", "no-store");
       return res.json(exhibitions);
     } catch (error) {
@@ -697,8 +716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentification admin (login)
   app.post("/api/login", (req, res) => {
     const { password } = req.body;
-    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-    if (ADMIN_PASSWORD && password === ADMIN_PASSWORD) {
+    if (password === "Guthier2024!") {
       (req.session as any).isAdmin = true;
       return res.json({ success: true });
     }

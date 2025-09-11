@@ -194,7 +194,44 @@ export default function About() {
       <div className="min-h-screen bg-black pt-16 md:pt-24">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="relative min-h-[80vh] flex items-center justify-center">
-            {/* Animation circulaire des œuvres (retirée) */}
+            {/* Animation circulaire des œuvres */}
+            {!isRevealed && orbitArtworks.length > 0 && orbitArtworks.map((artwork, index) => {
+              const angle = (index * 360) / Math.max(orbitArtworks.length, 1);
+              const radius = 300;
+              const x = Math.cos((angle * Math.PI) / 180) * radius;
+              const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+              // Sur mobile, on masque les images trop à gauche ou à droite (angle entre 60°-120° et 240°-300°)
+              const isSide = angle > 60 && angle < 120 || angle > 240 && angle < 300;
+
+              return (
+                <motion.div
+                  key={artwork.title}
+                  className={`absolute w-32 h-32${isSide ? ' hidden md:block' : ''}`}
+                  style={{
+                    x,
+                    y,
+                  }}
+                  animate={{
+                    rotate: 360,
+                  }}
+                  transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                >
+                  <img
+                    src={artwork.url}
+                    alt={`${artwork.title} - Œuvre d'Ivan Gauthier, artiste peintre contemporain`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    width="128"
+                    height="128"
+                  />
+                </motion.div>
+              );
+            })}
 
             {/* Cube interactif initial */}
             {!isRevealed && (

@@ -91,7 +91,6 @@ export default function ExpositionDetail() {
             transition={{ delay: 0.5 }}
             className="prose prose-lg prose-invert max-w-none"
           >
-            <h2 className="text-3xl font-playfair mb-6">Description de l'exposition</h2>
             <p className="text-xl text-white/80 leading-relaxed">
               {exhibition.description || "Description de l'exposition à venir..."}
             </p>
