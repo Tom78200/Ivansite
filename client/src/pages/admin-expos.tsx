@@ -180,7 +180,8 @@ export default function AdminExpos() {
           <input name="location" value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} placeholder="Lieu*" className="p-2 rounded bg-white/20 text-white border border-white/30" required />
           <input name="year" value={form.year} onChange={e => setForm(f => ({ ...f, year: e.target.value }))} placeholder="Année*" className="p-2 rounded bg-white/20 text-white border border-white/30" required />
           <input name="imageFile" type="file" accept="image/*" ref={fileInputRef} className="p-2 rounded bg-white/20 text-white border border-white/30" required />
-          <textarea name="description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Description*" className="p-2 rounded bg-white/20 text-white border border-white/30" rows={2} required />
+          <label className="text-sm text-white/80" htmlFor="expo-description">Thème / Description de l'exposition</label>
+          <textarea id="expo-description" name="description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Décrivez le thème, l'intention, le texte d'accroche..." className="p-2 rounded bg-white/20 text-white border border-white/30" rows={3} required />
           <button type="submit" className="bg-green-500 hover:bg-green-600 text-white rounded p-2 font-semibold mt-2 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Créer l'exposition">{isAdding ? "Ajout..." : "Créer l'exposition"}</button>
           {addError && <div className="text-red-400 text-center mt-2">{addError}</div>}
         </form>
