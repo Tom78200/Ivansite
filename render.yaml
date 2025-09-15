@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: ivansite
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm install && npm run build && npm run build:client
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE
+        sync: false
+      - key: SUPABASE_BUCKET
+        value: Images
+      - key: FORCE_SUPABASE
+        value: "1"
+      - key: ADMIN_PASSWORD
+        value: Guthier2024!
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: SMTP_TO
+        sync: false

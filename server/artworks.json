@@ -1,0 +1,34 @@
+[
+  {
+    "id": 5,
+    "title": "dfsdfs",
+    "imageUrl": "https://fzyxdcdzhppdxhoiqatz.supabase.co/storage/v1/object/public/Images/images/1757713291291-206012652.png",
+    "dimensions": "dsfdsfdfsdfs",
+    "technique": "dfsdfsdfs",
+    "year": "dsfdsf",
+    "description": "fds",
+    "category": "Nature morte",
+    "additionalImages": [],
+    "isVisible": true,
+    "showInSlider": true,
+    "order": 0
+  },
+  {
+    "id": 3,
+    "title": "fds",
+    "imageUrl": "https://fzyxdcdzhppdxhoiqatz.supabase.co/storage/v1/object/public/Images/images/1757712727605-560956633.png",
+    "dimensions": "fds",
+    "technique": "fds",
+    "year": "fds",
+    "description": "fds",
+    "category": "Nu",
+    "additionalImages": [
+      "https://fzyxdcdzhppdxhoiqatz.supabase.co/storage/v1/object/public/Images/images/1757714075632-875529339.png",
+      "https://fzyxdcdzhppdxhoiqatz.supabase.co/storage/v1/object/public/Images/images/1757714083919-302303497.png",
+      "https://fzyxdcdzhppdxhoiqatz.supabase.co/storage/v1/object/public/Images/images/1757714088446-526897451.png"
+    ],
+    "isVisible": true,
+    "showInSlider": true,
+    "order": 1
+  }
+]
