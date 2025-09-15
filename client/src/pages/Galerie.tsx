@@ -116,8 +116,13 @@ export default function Galerie() {
                   <div className="relative">
                     <motion.button 
                       aria-label="Défiler à gauche" 
-                      onClick={() => { setActiveRow(cat); scroll(cat, -1); }} 
-                      className="hidden md:block absolute -left-10 md:-left-14 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 border border-white/20 rounded-full p-2"
+                      onClick={(e) => { 
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveRow(cat); 
+                        scroll(cat, -1); 
+                      }} 
+                      className="hidden md:block absolute -left-10 md:-left-14 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 border border-white/20 rounded-full p-2 cursor-pointer"
                       initial={{ opacity: 0, x: -20 }}
                       whileInView={{ 
                         opacity: 1, 
@@ -134,6 +139,7 @@ export default function Galerie() {
                         backgroundColor: "rgba(0, 0, 0, 0.8)",
                         transition: { duration: 0.2 }
                       }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       ‹
                     </motion.button>
@@ -197,8 +203,13 @@ export default function Galerie() {
                     </div>
                     <motion.button 
                       aria-label="Défiler à droite" 
-                      onClick={() => { setActiveRow(cat); scroll(cat, 1); }} 
-                      className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 border border-white/20 rounded-full p-2"
+                      onClick={(e) => { 
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveRow(cat); 
+                        scroll(cat, 1); 
+                      }} 
+                      className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 border border-white/20 rounded-full p-2 cursor-pointer"
                       initial={{ opacity: 0, x: 20 }}
                       whileInView={{ 
                         opacity: 1, 
@@ -215,6 +226,7 @@ export default function Galerie() {
                         backgroundColor: "rgba(0, 0, 0, 0.8)",
                         transition: { duration: 0.2 }
                       }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       ›
                     </motion.button>
@@ -259,7 +271,12 @@ export default function Galerie() {
                     {t('gallery.others')}
                   </motion.h2>
                   <div className="relative">
-                    <button aria-label="Défiler à gauche" onClick={() => { setActiveRow('Autres'); scroll('Autres', -1); }} className="hidden md:block absolute -left-10 md:-left-14 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 border border-white/20 rounded-full p-2">‹</button>
+                    <button aria-label="Défiler à gauche" onClick={(e) => { 
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setActiveRow('Autres'); 
+                      scroll('Autres', -1); 
+                    }} className="hidden md:block absolute -left-10 md:-left-14 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 border border-white/20 rounded-full p-2 cursor-pointer">‹</button>
                     <div ref={setScrollerRef('Autres')} className="overflow-x-auto overflow-visible whitespace-nowrap snap-x snap-mandatory scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent py-2 sm:py-3 pl-0 pr-4 sm:pr-6 md:pr-8" style={{scrollbarWidth:'none', overflowY:'visible'}}>
                       {list.map((a, idx) => {
                         const rowKey = 'Autres';
@@ -319,7 +336,12 @@ export default function Galerie() {
                         );
                       })}
                     </div>
-                    <button aria-label="Défiler à droite" onClick={() => { setActiveRow('Autres'); scroll('Autres', 1); }} className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 border border-white/20 rounded-full p-2">›</button>
+                    <button aria-label="Défiler à droite" onClick={(e) => { 
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setActiveRow('Autres'); 
+                      scroll('Autres', 1); 
+                    }} className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 border border-white/20 rounded-full p-2 cursor-pointer">›</button>
                   </div>
                 </motion.div>
               );

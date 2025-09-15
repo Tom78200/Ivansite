@@ -807,47 +807,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Authentification admin (login)
+  // Authentification admin (login) - Ivan uniquement
   app.post("/api/login", async (req, res) => {
     try {
       const { username, password } = req.body || {};
-      // Mode "mot de passe seul" mais vérifié en BDD s'il y a un compte
-      if (!username) {
-        if (supabase) {
-          const { data: userRow, error } = await supabase
-            .from('users')
-            .select('id,username,password')
-            .order('id', { ascending: true })
-            .limit(1)
-            .maybeSingle();
-          if (error) return res.status(500).json({ error: error.message });
-          if (userRow && userRow.password) {
-            const ok = await bcrypt.compare(String(password || ""), String((userRow as any).password || ""));
-            if (!ok) return res.status(401).json({ error: "Mot de passe incorrect" });
-            (req.session as any).isAdmin = true;
-            (req.session as any).adminUser = { id: userRow.id, username: userRow.username };
-            return res.json({ success: true });
-          }
-        }
-        // Fallback env si aucun user en BDD
-        if (password && password === (process.env.ADMIN_PASSWORD || "Guthier2024!")) {
-          (req.session as any).isAdmin = true;
-          return res.json({ success: true, legacy: true });
-        }
-        return res.status(401).json({ error: "Mot de passe incorrect" });
+      
+      // Vérifier que username est fourni et correspond à "ivan"
+      if (!username || username.toLowerCase() !== 'ivan') {
+        return res.status(401).json({ error: "Nom d'utilisateur incorrect" });
       }
 
       if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
-      // Chercher l'utilisateur par username si fourni
+      
+      // Chercher l'utilisateur Ivan en BDD
       const { data: userRow, error } = await supabase
         .from('users')
         .select('id,username,password')
-        .eq('username', String(username))
+        .eq('username', 'ivan')
         .maybeSingle();
+      
       if (error) return res.status(500).json({ error: error.message });
-      if (!userRow) return res.status(401).json({ error: "Utilisateur introuvable" });
+      if (!userRow) return res.status(401).json({ error: "Utilisateur Ivan introuvable" });
+      
       const ok = await bcrypt.compare(String(password || ""), String((userRow as any).password || ""));
       if (!ok) return res.status(401).json({ error: "Mot de passe incorrect" });
+      
       (req.session as any).isAdmin = true;
       (req.session as any).adminUser = { id: userRow.id, username: userRow.username };
       return res.json({ success: true });
