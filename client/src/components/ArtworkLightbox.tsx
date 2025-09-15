@@ -142,24 +142,30 @@ export default function ArtworkLightbox({ artwork, isOpen, onClose }: ArtworkLig
               {hasMultipleImages && (
                 <>
                   <motion.button
-                    onClick={goToPrevious}
-                    className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-white/20 rounded-full p-2 sm:p-3 shadow-md border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      goToPrevious();
+                    }}
+                    className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-white/20 rounded-full p-2 sm:p-3 shadow-md border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 cursor-pointer"
                     aria-label="Image précédente"
                     whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
-                    whileTap={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                    whileTap={{ backgroundColor: "rgba(255, 255, 255, 0.1)", scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    onClickCapture={(e) => e.stopPropagation()}
                   >
                     <span className="text-white text-lg sm:text-xl font-bold">‹</span>
                   </motion.button>
                   <motion.button
-                    onClick={goToNext}
-                    className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-white/20 rounded-full p-2 sm:p-3 shadow-md border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      goToNext();
+                    }}
+                    className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-white/20 rounded-full p-2 sm:p-3 shadow-md border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 cursor-pointer"
                     aria-label="Image suivante"
                     whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
-                    whileTap={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                    whileTap={{ backgroundColor: "rgba(255, 255, 255, 0.1)", scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    onClickCapture={(e) => e.stopPropagation()}
                   >
                     <span className="text-white text-lg sm:text-xl font-bold">›</span>
                   </motion.button>
