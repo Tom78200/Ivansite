@@ -3,6 +3,7 @@ import { useExhibitions } from "@/hooks/use-exhibitions";
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import { useLanguage } from "@/contexts/LanguageContext";
+import TranslatedText from "@/components/TranslatedText";
 
 export default function Expositions() {
   const { data: exhibitions, isLoading } = useExhibitions();
@@ -79,10 +80,10 @@ export default function Expositions() {
                 >
                   <div className="text-center">
                     <h3 className="text-5xl font-playfair text-white mb-4 drop-shadow-lg">
-                      {exhibition.title}
+                      <TranslatedText text={exhibition.title} />
                     </h3>
                     <p className="text-xl text-white opacity-80">
-                      {exhibition.location} • {exhibition.year}
+                      <TranslatedText text={exhibition.location} /> • {exhibition.year}
                     </p>
                   </div>
                 </motion.div>

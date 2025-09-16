@@ -3,6 +3,7 @@ import { useExhibitions } from "@/hooks/use-exhibitions";
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
+import TranslatedText from "@/components/TranslatedText";
 
 export default function ExpositionDetail() {
   const { data: exhibitions } = useExhibitions();
@@ -73,10 +74,10 @@ export default function ExpositionDetail() {
             className="max-w-4xl mx-auto"
           >
             <h1 className="text-5xl md:text-7xl font-playfair text-white mb-2">
-              {exhibition.title}
+              <TranslatedText text={exhibition.title} />
             </h1>
             <p className="text-xl text-white/80">
-              {exhibition.location} • {exhibition.year}
+              <TranslatedText text={exhibition.location} /> • {exhibition.year}
             </p>
             {(exhibition as any).theme && (
               <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-white/15 border border-white/25 backdrop-blur-sm">
@@ -85,7 +86,7 @@ export default function ExpositionDetail() {
             )}
             {exhibition.description && (
               <p className="mt-4 text-lg md:text-xl text-white/80 max-w-3xl leading-relaxed">
-                {exhibition.description}
+                <TranslatedText text={exhibition.description} />
               </p>
             )}
           </motion.div>
@@ -177,7 +178,9 @@ function ExpositionMasonry({ images }: { images: { url: string; caption: string 
                 className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <p className="text-white font-medium text-lg">{image.caption}</p>
+                <p className="text-white font-medium text-lg">
+                  <TranslatedText text={image.caption} />
+                </p>
               </div>
             </motion.div>
           ))}
