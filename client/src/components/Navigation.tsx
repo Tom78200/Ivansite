@@ -50,7 +50,7 @@ export default function Navigation() {
                     location === '/expositions' ? 'opacity-100 font-semibold' : 'opacity-80'
                   }`}
                 >
-                  Expositions
+                  {t('nav.exhibitions')}
                 </motion.span>
               </Link>
               <Link href="/about">
@@ -60,7 +60,7 @@ export default function Navigation() {
                     location === '/about' ? 'opacity-100 font-semibold' : 'opacity-80'
                   }`}
                 >
-                  À propos
+                  {t('nav.about')}
                 </motion.span>
               </Link>
             </div>
