@@ -111,7 +111,7 @@ export default function Galerie() {
                     }}
                     viewport={{ once: true }}
                   >
-                    {translateCategory(cat)}
+                    {cat}
                   </motion.h2>
                   <div className="relative">
                     <motion.button 
