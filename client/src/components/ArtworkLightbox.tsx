@@ -116,7 +116,7 @@ export default function ArtworkLightbox({ artwork, isOpen, onClose }: ArtworkLig
           >
             <button
               onClick={onClose}
-              className="absolute top-2 right-2 z-20 bg-black/60 rounded-full p-1.5 sm:p-2 hover:bg-white/20 transition-all duration-300 shadow-md border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+              className="absolute top-4 right-4 z-20 bg-black/60 rounded-full p-1.5 sm:p-2 hover:bg-white/20 transition-all duration-300 shadow-md border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
               aria-label="Fermer la fenêtre d'aperçu"
             >
               <X className="text-white" size={18} />
