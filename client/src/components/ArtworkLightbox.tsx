@@ -157,9 +157,10 @@ export default function ArtworkLightbox({ artwork, isOpen, onClose }: ArtworkLig
                     }}
                     className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-white/20 rounded-full p-2 sm:p-3 shadow-md border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 cursor-pointer select-none touch-manipulation"
                     aria-label="Image précédente"
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.1 }}
-                    style={{ willChange: 'auto', WebkitTapHighlightColor: 'transparent' }}
+                    whileHover={{}}
+                    whileTap={{}}
+                    transition={{ duration: 0 }}
+                    style={{ willChange: 'auto', WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none' }}
                   >
                     <span className="text-white text-lg sm:text-xl font-bold">‹</span>
                   </motion.button>
@@ -171,9 +172,10 @@ export default function ArtworkLightbox({ artwork, isOpen, onClose }: ArtworkLig
                     }}
                     className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-white/20 rounded-full p-2 sm:p-3 shadow-md border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 cursor-pointer select-none touch-manipulation"
                     aria-label="Image suivante"
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.1 }}
-                    style={{ willChange: 'auto', WebkitTapHighlightColor: 'transparent' }}
+                    whileHover={{}}
+                    whileTap={{}}
+                    transition={{ duration: 0 }}
+                    style={{ willChange: 'auto', WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none' }}
                   >
                     <span className="text-white text-lg sm:text-xl font-bold">›</span>
                   </motion.button>
