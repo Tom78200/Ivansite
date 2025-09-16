@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useArtworkTranslations } from "@/utils/translations";
+import { ChevronRight } from "lucide-react";
 
 export default function Galerie() {
   const { data: artworks } = useArtworks();
@@ -18,6 +19,7 @@ export default function Galerie() {
   };
 
   const [selectedIndexByRow, setSelectedIndexByRow] = useState<Record<string, number>>({});
+  const [showMobileHint, setShowMobileHint] = useState<Record<string, boolean>>({});
 
   const setSelected = (key: string, idx: number) => {
     setSelectedIndexByRow((prev) => ({ ...prev, [key]: idx }));
@@ -42,6 +44,9 @@ export default function Galerie() {
     
     el.scrollTo({ left: targetLeft, behavior: 'smooth' });
     setSelected(key, targetIndex);
+    
+    // Masquer l'indicateur mobile après navigation
+    setShowMobileHint(prev => ({ ...prev, [key]: false }));
   };
 
   useEffect(() => {
@@ -58,6 +63,20 @@ export default function Galerie() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [activeRow, selectedIndexByRow]);
+
+  // Afficher l'indicateur mobile pour les catégories avec plus de 4 images
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      ARTWORK_CATEGORIES.forEach(cat => {
+        const list = data.filter(a => normalize(a.category) === normalize(cat));
+        if (list.length > 4) {
+          setShowMobileHint(prev => ({ ...prev, [cat]: true }));
+        }
+      });
+    }, 2000); // Afficher après 2 secondes
+
+    return () => clearTimeout(timer);
+  }, [data]);
   return (
     <div className="min-h-screen bg-black text-white pt-16 sm:pt-20 md:pt-28">
       <section className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
@@ -143,7 +162,44 @@ export default function Galerie() {
                     >
                       ‹
                     </motion.button>
-                    <div ref={setScrollerRef(cat)} className="overflow-x-auto overflow-visible whitespace-nowrap snap-x snap-mandatory scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent py-2 sm:py-3 pl-0 pr-4 sm:pr-6 md:pr-8" style={{scrollbarWidth:'none', overflowY:'visible'}}>
+                    <div ref={setScrollerRef(cat)} className="relative overflow-x-auto overflow-visible whitespace-nowrap snap-x snap-mandatory scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent py-2 sm:py-3 pl-0 pr-4 sm:pr-6 md:pr-8" style={{scrollbarWidth:'none', overflowY:'visible'}}>
+                      {/* Indicateur mobile pour navigation */}
+                      <AnimatePresence>
+                        {showMobileHint[cat] && (
+                          <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ 
+                              opacity: [0, 1, 0],
+                              x: [20, 0, -10]
+                            }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ 
+                              duration: 2,
+                              repeat: Infinity,
+                              repeatDelay: 1,
+                              ease: "easeInOut"
+                            }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 md:hidden"
+                          >
+                            <div className="bg-black/70 backdrop-blur-sm rounded-full p-2 border border-white/30">
+                              <ChevronRight className="w-5 h-5 text-white" />
+                            </div>
+                            <motion.div
+                              className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap"
+                              initial={{ opacity: 0, y: 5 }}
+                              animate={{ opacity: [0, 1, 0], y: [5, 0, -5] }}
+                              transition={{ 
+                                duration: 2,
+                                repeat: Infinity,
+                                repeatDelay: 1,
+                                ease: "easeInOut"
+                              }}
+                            >
+                              Glissez →
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                       {list.map((a, idx) => {
                         const isSelected = (selectedIndexByRow[cat] ?? 0) === idx;
                         return (
