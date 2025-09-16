@@ -35,3 +35,9 @@ services:
         sync: false
       - key: SMTP_TO
         sync: false
+      - key: TRANSLATE_PROVIDER
+        value: deepl
+      - key: DEEPL_API_KEY
+        sync: false
+      - key: DEEPL_API_ENDPOINT
+        value: https://api-free.deepl.com/v2/translate
