@@ -38,6 +38,6 @@ services:
       - key: TRANSLATE_PROVIDER
         value: deepl
       - key: DEEPL_API_KEY
-        sync: false
+        value: ""
       - key: DEEPL_API_ENDPOINT
         value: https://api-free.deepl.com/v2/translate
