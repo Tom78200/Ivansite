@@ -207,12 +207,20 @@ const translations = {
 };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('fr');
+  const [language, setLanguage] = useState<Language>('en');
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('language') as Language;
-    if (savedLanguage && (savedLanguage === 'fr' || savedLanguage === 'en')) {
-      setLanguage(savedLanguage);
+    try {
+      const savedLanguage = localStorage.getItem('language') as Language;
+      if (savedLanguage && (savedLanguage === 'fr' || savedLanguage === 'en')) {
+        setLanguage(savedLanguage);
+        return;
+      }
+      const nav = (navigator?.language || navigator?.languages?.[0] || '').toLowerCase();
+      if (nav.startsWith('fr')) setLanguage('fr');
+      else setLanguage('en');
+    } catch {
+      setLanguage('en');
     }
   }, []);
 
