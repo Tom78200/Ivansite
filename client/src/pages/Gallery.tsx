@@ -2,11 +2,11 @@ import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useArtworks } from "@/hooks/use-artworks";
 import ArtworkLightbox from "@/components/ArtworkLightbox";
-import MobileScrollbar from "@/components/MobileScrollbar";
 import type { Artwork } from "@shared/schema";
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import { useLanguage } from "@/contexts/LanguageContext";
+ 
 import TranslatedText from "@/components/TranslatedText";
 
 export default function Gallery() {
@@ -14,9 +14,9 @@ export default function Gallery() {
   const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const [showMobileScrollbar, setShowMobileScrollbar] = useState(false);
   const [, setLocation] = useLocation();
   const { t } = useLanguage();
+ 
 
   const sliderArtworks = artworks?.filter(artwork => artwork.showInSlider) || [];
 
@@ -32,41 +32,11 @@ export default function Gallery() {
 
   useEffect(() => {
     if (sliderArtworks.length === 0) return;
-    
     const timer = setInterval(() => {
       setCurrentSlideIndex((prev) => (prev + 1) % sliderArtworks.length);
     }, 5000);
-
     return () => clearInterval(timer);
   }, [sliderArtworks.length]);
-
-  // Gestion de la scrollbar mobile
-  useEffect(() => {
-    const handleScroll = () => {
-      const isMobile = window.innerWidth < 768;
-      const scrollHeight = document.documentElement.scrollHeight;
-      const containerHeight = window.innerHeight;
-      
-      if (isMobile && scrollHeight > containerHeight) {
-        setShowMobileScrollbar(true);
-      } else {
-        setShowMobileScrollbar(false);
-      }
-    };
-
-    handleScroll();
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, []);
-
-  const handleMobileScroll = (scrollTop: number) => {
-    window.scrollTo({ top: scrollTop, behavior: 'smooth' });
-  };
 
   if (isLoading) {
     return (
@@ -147,7 +117,6 @@ export default function Gallery() {
       </Helmet>
       <AnimatePresence>
         <section className="relative w-full h-[90vh] overflow-hidden">
-          {/* Slider principal : sur mobile, pas d'images à gauche/droite */}
           {sliderArtworks.length > 0 ? (
             <AnimatePresence mode="wait">
               {sliderArtworks[currentSlideIndex] && (
@@ -177,12 +146,10 @@ export default function Gallery() {
           ) : (
             <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-black" />
           )}
-          {/* Les flèches ou images latérales sont désactivées sur mobile (rien à faire car il n'y en a pas dans ce code) */}
           {/* Nom centré mobile */}
           <div className="md:hidden absolute top-1/2 left-1/2 z-20 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none select-none w-full px-3 sm:px-4">
             <h1 className="text-3xl xs:text-4xl sm:text-5xl font-playfair text-white mb-2 tracking-wider uppercase">IVAN GAUTHIER</h1>
             <p className="text-sm sm:text-base text-white opacity-80 tracking-[0.2em] uppercase mb-4">Artiste Contemporain</p>
-            {/* Bouton 'Voir les œuvres phares' retiré sur mobile */}
           </div>
           {/* Nom centré desktop */}
           <motion.div
@@ -197,9 +164,7 @@ export default function Gallery() {
           >
             <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-playfair text-white mb-4 tracking-wider">IVAN GAUTHIER</h1>
             <p className="text-lg md:text-xl text-white opacity-80 tracking-[0.3em] uppercase">Artiste Contemporain</p>
-            <div className="flex justify-center w-full mt-8">
-              {/* Lien œuvres phares supprimé */}
-            </div>
+            <div className="flex justify-center w-full mt-8"></div>
           </motion.div>
         </section>
 
@@ -213,13 +178,6 @@ export default function Gallery() {
           artwork={selectedArtwork}
           isOpen={isLightboxOpen}
           onClose={closeLightbox}
-        />
-        
-        <MobileScrollbar
-          isVisible={showMobileScrollbar}
-          onScroll={handleMobileScroll}
-          scrollHeight={typeof window !== 'undefined' ? document.documentElement.scrollHeight : 0}
-          containerHeight={typeof window !== 'undefined' ? window.innerHeight : 0}
         />
       </AnimatePresence>
     </>

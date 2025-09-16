@@ -142,6 +142,7 @@ export default function Navigation() {
             className="fixed inset-0 z-40 bg-black/80 flex flex-col items-end"
           >
             <nav className="flex flex-col w-full items-center gap-6 sm:gap-8 mt-16 sm:mt-20">
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="text-white text-base sm:text-lg font-playfair tracking-[0.15em] uppercase font-semibold hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">Accueil</Link>
               <Link href="/galerie" onClick={() => setMobileMenuOpen(false)} className="text-white text-base sm:text-lg font-playfair tracking-[0.15em] uppercase font-semibold hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">{t('nav.gallery')}</Link>
               <Link href="/expositions" onClick={() => setMobileMenuOpen(false)} className="text-white text-base sm:text-lg font-playfair tracking-[0.15em] uppercase font-semibold hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">{t('nav.exhibitions')}</Link>
               <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="text-white text-base sm:text-lg font-playfair tracking-[0.15em] uppercase font-semibold hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">{t('nav.about')}</Link>

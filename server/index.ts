@@ -39,7 +39,11 @@ if (app.get("env") === "development") {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "https://www.youtube.com", "https://replit.com"],
+        // Autoriser les images hébergées sur Supabase, toutes origines HTTPS et data: (icônes inline)
         imgSrc: [
+          "'self'",
+          "data:",
+          "https:",
           "https://*.supabase.co"
         ],
         frameSrc: ["'self'", "https://www.youtube.com"],

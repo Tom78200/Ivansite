@@ -100,8 +100,8 @@ export default function Contact() {
         <title>Contact - Ivan Gauthier</title>
         <meta name="description" content="Contactez Ivan Gauthier pour toute demande d'information, d'exposition ou de collaboration artistique." />
       </Helmet>
-      <section className="min-h-[100dvh] pt-28 md:pt-24 pb-16 px-4 md:px-8 overflow-visible relative z-10">
-        <div className="max-w-6xl mx-auto">
+      <section className="min-h-[100dvh] pt-28 md:pt-24 pb-16 px-4 md:px-8 overflow-x-hidden overflow-y-visible relative z-10">
+        <div className="max-w-6xl mx-auto w-full">
           <div
             className="text-center mb-10 md:mb-16 antialiased"
           >
@@ -113,7 +113,7 @@ export default function Contact() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-10 md:gap-16">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-16 px-0">
             {/* Contact Info */}
             <div className="space-y-8">
               <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
