@@ -100,8 +100,8 @@ export default function Contact() {
         <title>Contact - Ivan Gauthier</title>
         <meta name="description" content="Contactez Ivan Gauthier pour toute demande d'information, d'exposition ou de collaboration artistique." />
       </Helmet>
-      <section className="min-h-[100dvh] pt-28 md:pt-24 pb-16 pl-4 pr-6 md:px-8 relative z-10 overflow-x-hidden">
-        <div className="max-w-6xl mx-auto w-full px-0 md:px-0">
+      <section className="min-h-[100dvh] pt-28 md:pt-24 pb-16 px-4 md:px-8 relative z-10 overflow-x-hidden box-border">
+        <div className="w-full mx-auto max-w-[480px] md:max-w-6xl px-0 md:px-0 box-border">
           <div
             className="text-center mb-10 md:mb-16 antialiased"
           >
@@ -113,10 +113,10 @@ export default function Contact() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-16 px-0">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-16">
             {/* Contact Info */}
             <div className="space-y-8 w-full">
-              <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 md:mx-0 w-full">
+              <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 w-full mx-auto box-border">
                 <h3 className="text-2xl font-playfair mb-8 text-white">{t('contact.info')}</h3>
                 <div className="space-y-6">
                   {contactInfo.map(({ icon: Icon, text, label }, index) => (
@@ -136,7 +136,7 @@ export default function Contact() {
                 </div>
               </div>
 
-              <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 md:mx-0 w-full">
+              <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 w-full mx-auto box-border">
                 <h3 className="text-xl font-playfair mb-4 text-white">{translatedStudioHours}</h3>
                 <p className="text-white/80 whitespace-pre-line">
                   {translatedSchedule}
@@ -148,7 +148,7 @@ export default function Contact() {
             <div className="w-full">
               <form
                 onSubmit={handleSubmit}
-                className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 space-y-6 md:mx-0 w-full"
+                className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 space-y-6 w-full mx-auto box-border"
               >
                 <h3 className="text-2xl font-playfair mb-8 text-white">{translatedFormTitle}</h3>
                 
