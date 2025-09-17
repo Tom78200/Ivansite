@@ -116,7 +116,7 @@ export default function Contact() {
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-16 px-0">
             {/* Contact Info */}
             <div className="space-y-8 w-full">
-              <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 mx-4 md:mx-0">
+              <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 mx-5 md:mx-0">
                 <h3 className="text-2xl font-playfair mb-8 text-white">{t('contact.info')}</h3>
                 <div className="space-y-6">
                   {contactInfo.map(({ icon: Icon, text, label }, index) => (
@@ -136,7 +136,7 @@ export default function Contact() {
                 </div>
               </div>
 
-              <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 mx-4 md:mx-0">
+              <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 mx-5 md:mx-0">
                 <h3 className="text-xl font-playfair mb-4 text-white">{translatedStudioHours}</h3>
                 <p className="text-white/80 whitespace-pre-line">
                   {translatedSchedule}
@@ -148,7 +148,7 @@ export default function Contact() {
             <div className="w-full">
               <form
                 onSubmit={handleSubmit}
-                className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 space-y-6 mx-4 md:mx-0"
+                className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 space-y-6 mx-5 md:mx-0"
               >
                 <h3 className="text-2xl font-playfair mb-8 text-white">{translatedFormTitle}</h3>
                 
