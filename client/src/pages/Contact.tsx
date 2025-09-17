@@ -100,8 +100,8 @@ export default function Contact() {
         <title>Contact - Ivan Gauthier</title>
         <meta name="description" content="Contactez Ivan Gauthier pour toute demande d'information, d'exposition ou de collaboration artistique." />
       </Helmet>
-      <section className="min-h-[100dvh] pt-28 md:pt-24 pb-16 px-8 md:px-8 relative z-10 overflow-x-hidden">
-        <div className="max-w-6xl mx-auto w-full">
+      <section className="min-h-[100dvh] pt-28 md:pt-24 pb-16 px-6 md:px-8 relative z-10 overflow-x-hidden">
+        <div className="w-full mx-auto max-w-[480px] md:max-w-6xl overflow-hidden">
           <div
             className="text-center mb-10 md:mb-16 antialiased"
           >
