@@ -115,7 +115,7 @@ export default function Contact() {
 
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-16">
             {/* Contact Info */}
-            <div className="space-y-8">
+            <div className="space-y-8 max-w-md mx-auto md:max-w-none md:mx-0 w-full">
               <div className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
                 <h3 className="text-2xl font-playfair mb-8 text-white">{t('contact.info')}</h3>
                 <div className="space-y-6">
@@ -145,7 +145,7 @@ export default function Contact() {
             </div>
 
             {/* Contact Form */}
-            <div>
+            <div className="max-w-md mx-auto md:max-w-none md:mx-0 w-full">
               <form
                 onSubmit={handleSubmit}
                 className="bg-white/5 md:backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 space-y-6"
