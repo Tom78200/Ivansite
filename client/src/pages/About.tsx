@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Instagram, Facebook, X } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Helmet } from "react-helmet-async";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -34,6 +35,7 @@ export default function About() {
   const [isOpen, setIsOpen] = useState(false);
   const [orbitArtworks, setOrbitArtworks] = useState<{ url: string; title: string }[]>([]);
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   
   // Traductions automatiques
   const { translatedText: translatedBirthText } = useAutoTranslation("Je suis né le 1er mars 2000 à Beregovo en Ukraine.");
@@ -144,6 +146,14 @@ export default function About() {
 
     Ma démarche artistique s'inscrit dans une recherche constante d'authenticité et d'émotion pure. Chaque œuvre est une fenêtre ouverte sur mon univers intérieur, où les frontières entre réalité et imagination s'estompent pour laisser place à une expression sincère et viscérale.
   `;
+  const mobileBiography = `
+    Je suis né le 1er mars 2000 à Beregovo en Ukraine. Très jeune, je me confronte à de nombreuses formes d’expression — danse, théâtre, cinéma, piano, dessin, mode, peinture — qui s’enrichissent mutuellement.
+
+    Depuis mes 16 ans en France et à l’international, j’expose et vends mes œuvres. Mon travail expressionniste et figuratif traduit des émotions intenses, avec une gamme chromatique riche au service de créations oniriques, parfois tendres ou témoignant de l’âpreté de la vie.
+
+    Ma démarche artistique cherche l’authenticité et l’émotion pure : chaque œuvre est une fenêtre sur mon univers intérieur, où réalité et imagination s’entremêlent pour une expression sincère et viscérale.
+  `;
+  const effectiveFullBiography = isMobile ? mobileBiography : fullBiography;
 
   const handleNext = () => {
     if (step < steps.length - 1) {
@@ -420,7 +430,7 @@ export default function About() {
                   <X size={24} />
                 </motion.button>
                 <div className="prose prose-lg prose-invert max-w-none">
-                  {fullBiography.split('\n\n').map((paragraph, index) => (
+                  {effectiveFullBiography.split('\n\n').map((paragraph, index) => (
                     <motion.p
                       key={index}
                       initial={{ opacity: 0, y: 20 }}
