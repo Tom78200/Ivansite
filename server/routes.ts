@@ -854,6 +854,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ isAdmin, adminUser });
   });
 
+  // Keepalive: requête légère pour empêcher la mise en veille de Supabase
+  app.get('/api/keepalive', async (_req, res) => {
+    try {
+      if (!supabase) {
+        // Le serveur répond quand même OK, mais signale que Supabase est absent
+        return res.json({ ok: true, supabase: false });
+      }
+      const { error } = await supabase.from('users').select('id').limit(1);
+      if (error) {
+        return res.status(500).json({ ok: false, error: error.message });
+      }
+      return res.json({ ok: true, supabase: true });
+    } catch (e: any) {
+      return res.status(500).json({ ok: false, error: e?.message || 'unknown' });
+    }
+  });
   // Endpoint pour créer un admin si aucun n'existe (à protéger par un secret setup)
   app.post('/api/admin/setup', async (req, res) => {
     try {
