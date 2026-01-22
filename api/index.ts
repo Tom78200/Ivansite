@@ -2,7 +2,7 @@ import express, { type Request, type Response, type NextFunction } from "express
 import helmet from "helmet";
 import session from "express-session";
 import serverless from "serverless-http";
-import { registerRoutes } from "../server/routes";
+import { registerRoutes } from "../server/routes.js";
 
 // Vercel serverless handler wrapping our Express app
 const app = express();
